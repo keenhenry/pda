@@ -5,12 +5,13 @@ pda is a commandline tool used to manage several useful lists in your life - nam
 
 Those lists are stored in a database, and are accessed through pda commandline interface, which is explained below:
 
-## CREATE lists 
+## Command line usage
 
-## READ lists
+### CREATE lists 
+
+### READ lists
 
 ```bash
-
 # to list todo list on commandline 
 $ pda -r todo
 
@@ -27,4 +28,6 @@ $ pda -r qa
 $ pda -r resolution
 ```
 
-## UPDATE lists
+### UPDATE lists
+
+## License
