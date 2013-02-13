@@ -5,7 +5,7 @@ pda is a commandline tool used to manage several useful lists in your life - nam
 
 Those lists are stored in a database, and are accessed through pda commandline interface, which is explained below:
 
-## pda CLI (Command-Line Interfaces)
+## pda Documentation
 
 List names can be abbreviated as D, L, N, Q, R, respectively.
 
