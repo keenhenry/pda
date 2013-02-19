@@ -1,11 +1,10 @@
 pda - Personal Desktop Assistant
 ================================
 
-pda is a commandline tool used to manage several useful lists in your life - namely, TODO, TOLEARN, NOTE, QA and RESOLUTIONS.
+pda is a commandline tool used to manage several useful lists in your life - namely, TODO, TOLEARN, NOTE, QA and RESOLUTIONS. Lists are 
+stored in a database, and are accessed through pda commandline interface, which is explained below:
 
-Those lists are stored in a database, and are accessed through pda commandline interface, which is explained below:
-
-## Documentation
+## Synopsis
 
 List names can be abbreviated as D, L, N, Q, R, respectively.
 
@@ -16,9 +15,13 @@ $ pda -c <list name(s)>
 
 # to create all the lists in the database
 $ pda -ca 
+
+# import a file into a list, the type of file supported will need to be determined
+# the syntax of the content of the file also needs to be determined
+$ pda -ci <list name> <filepath>
 ```
 
-### READ lists
+### QUERY lists
 
 ```bash
 # to list daily, weekly, weekendly, monthly, seasonly, yearly contents of 
@@ -33,17 +36,17 @@ $ pda -la -[d|w|e|m|s|y]
 ### UPDATE lists
 
 ```bash
-# to update {todo|tolearn|note|qa|resolution} list on commandline 
-$ pda -e <list name>
-
-# to add an item in {todo|tolearn|note|qa|resolution} list on commandline 
+# to add an item in {todo|tolearn|note|qa|resolution} list
 # -d meaning daily plan, -w weekly, -e weekend, -m monthly, -s seasonly, -y yearly
 # for list 'note' and 'qa', only daily is allowed and defaulted.
 $ pda -a <list name> -[d|w|e|m|s|y] <a description of the thing you want to note down>
 
-# to add update an item in {todo|tolearn|note|qa|resolution} list on commandline 
-# -d meaning to delete that item, -u meaning to update
-$ pda -e <list name> -[d|u] <a list of item numbers>
-```
+# to update an item in {todo|tolearn|note|qa|resolution} list
+$ pda -u <list name> <item number> <item content in text>
 
-## License
+# to update the priority of an item in {todo|tolearn|note|qa|resolution} list
+$ pda -p <list name> <item number> <priority #>
+
+# to delete items in {todo|tolearn|note|qa|resolution} list
+$ pda -d <list name> <a list of item numbers>
+```
