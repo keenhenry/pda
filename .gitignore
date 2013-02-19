@@ -36,6 +36,3 @@ nosetests.xml
 
 # git
 .gitignore
-
-# misc
-tmp
