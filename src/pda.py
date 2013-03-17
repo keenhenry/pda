@@ -8,70 +8,92 @@ import re
 #   This file is the pda cli 
 #==========================================================================
 
-#Create variables out of shell commands
-#Note triple quotes can embed Bash
+# VERBOSE = False
 
-#You could add another bash command here
-#HOLDING_SPOT="""fake_command"""
+# functions to parse options
+def create(option, opt_str, value, parser, *args, **kwargs):
+    assert value is None
+    value = []
 
-#Determines Home Directory Usage in Gigs
-HOMEDIR_USAGE = """
-du -sh $HOME | cut -f1
-"""
+    if not parser.rargs:
+        parser.error("-c option requires at least one argument")
+    else:
+        for arg in parser.rargs:
+            value.append(arg)
 
-#Determines IP Address
-IPADDR = """
-/sbin/ifconfig -a | awk '/(cast)/ { print $2 }' | cut -d':' -f2 | head -1
-"""
+    # consume arguments in rargs
+    del parser.rargs[:len(value)]
 
-#This function takes Bash commands and returns them
-def runBash(cmd):
-    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-    out = p.stdout.read().strip()
-    return out  #This is the stdout from the shell command
+    # set value for dest variable
+    setattr(parser.values, option.dest, value)
 
-VERBOSE=False
-def report(output,cmdtype="UNIX COMMAND:"):
-   #Notice the global statement allows input from outside of function
-   if VERBOSE:
-       print "%s: %s" % (cmdtype, output)
-   else:
-       print output
+def show(parser, opt, args):
+
+    if not args:
+        parser.error("-s option requires at least an argument")
+    else:
+        print "show lists:", args
+    return
+
+def update(option, opt, value, parser):
+    print "update lists"
 
 
-#Function to control option parsing in Python
+# Function to control option parsing in Python
 def controller():
-    global VERBOSE
-    #Create instance of OptionParser Module, included in Standard Library
-    p = optparse.OptionParser(description='A unix toolbox',
-                                            prog='py4sa',
-                                            version='py4sa 0.1',
-                                            usage= '%prog [option]')
-    p.add_option('--ip','-i', action="store_true", help='gets current IP Address')
-    p.add_option('--usage', '-u', action="store_true", help='gets disk usage of homedir')
-    p.add_option('--verbose', '-v',
-                action = 'store_true',
-                help='prints verbosely',
-                default=False)
+    # global VERBOSE
 
-    #Option Handling passes correct parameter to runBash
+    # create instance of OptionParser Module 
+    p = optparse.OptionParser(description = 'A Personal Desktop Assistant to manage useful lists, like TODO list.',
+                              prog        = 'pda',
+                              version     = 'pda 0.1',
+                              usage       = 'usage: %prog [options] [list(s)]')
+
+    #========================#
+    # Create Options objects #
+    #========================#
+
+    # option to create lists
+    p.add_option('--create', '-c', 
+            action='callback', 
+            callback=create, 
+            dest='create',
+            metavar="LISTS",
+            help='create list(s) in database')
+
+    # option to display lists
+    p.add_option('--show', '-s', action="store_true", help='show contents of a list(s) in database')
+
+    # option to specify list(s)
+    # p.add_option('--list', '-l', dest="lists", help='specify the lists to be operated on', default=[]);
+    # p.add_option('--all', '-a', nargs=0, dest="lists", help='specify the lists to be operated on', default=['todo','tolearn','note','qa','resolution']);
+
+    # options to update lists
+    # p.add_option('--add','-a', action="store_true", help='gets current IP Address')
+    # p.add_option('--update','-u', action="store_true", help='gets current IP Address')
+    # p.add_option('--priority','-p', action="store_true", help='gets current IP Address')
+    # p.add_option('--delete','-d', action="store_true", help='gets current IP Address')
+
+    # other options
+    # p.add_option('--verbose', '-v', action = 'store_true', help='prints verbosely', default=False)
+
     options, arguments = p.parse_args()
-    if options.verbose:
-        VERBOSE=True
-    if options.ip:
-        value = runBash(IPADDR)
-        report(value,"IPADDR")
-    elif options.usage:
-        value = runBash(HOMEDIR_USAGE)
-        report(value, "HOMEDIR_USAGE")
+
+    #=============================================================#
+    # Parsing options and perform appropriate actions accordingly #
+    #=============================================================#
+    # if options.verbose:
+    #     VERBOSE=True
+
+    if options.create:
+        print "create lists"
+    elif options.show:
+        show(p, options, arguments)
     else:
         p.print_help()
 
-#Runs all the functions
 def main():
     controller()
 
-#This idiom means the below code only runs when executed from command line
 if __name__ == '__main__':
     main()
-
