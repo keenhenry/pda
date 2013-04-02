@@ -27,17 +27,8 @@ def create(option, opt_str, value, parser, *args, **kwargs):
     # set value for dest variable
     setattr(parser.values, option.dest, value)
 
-def show(parser, opt, args):
-
-    if not args:
-        parser.error("-s option requires at least an argument")
-    else:
-        print "show lists:", args
-    return
-
 def update(option, opt, value, parser):
     print "update lists"
-
 
 # Function to control option parsing in Python
 def controller():
@@ -61,8 +52,13 @@ def controller():
             metavar="LISTS",
             help='create list(s) in database')
 
-    # option to display lists
-    p.add_option('--show', '-s', action="store_true", help='show contents of a list(s) in database')
+    # option to display the content of a list
+    # this option takes ONE argument only
+    p.add_option('--show', '-s', 
+            action='store', 
+            dest='show',
+            metavar="LISTNAME",
+            help='show contents of a list in database')
 
     # option to specify list(s)
     # p.add_option('--list', '-l', dest="lists", help='specify the lists to be operated on', default=[]);
@@ -88,7 +84,7 @@ def controller():
     if options.create:
         print "create lists"
     elif options.show:
-        show(p, options, arguments)
+        print "show lists"
     else:
         p.print_help()
 
