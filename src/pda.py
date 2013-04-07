@@ -38,7 +38,7 @@ def controller():
     p = optparse.OptionParser(description = 'A Personal Desktop Assistant to manage useful lists, like TODO list.',
                               prog        = 'pda',
                               version     = 'pda 0.1',
-                              usage       = 'usage: %prog [options] [list(s)]')
+                              usage       = '%prog [-c <list names>] [-s <list name>]')
 
     #========================#
     # Create Options objects #
@@ -49,21 +49,24 @@ def controller():
             action='callback', 
             callback=create, 
             dest='create',
-            metavar="LISTS",
-            help='create list(s) in database')
+            help='create lists in database')
 
     # option to display the content of a list
     # this option takes ONE argument only
     p.add_option('--show', '-s', 
             action='store', 
             dest='show',
+            nargs=1,
             metavar="LISTNAME",
             help='show contents of a list in database')
 
+    # option to include all the lists available in database for processing
+    p.add_option('--all', '-a',
+                 action='store_true',
+                 help='include all the lists in database to be operated on');
+
     # option to specify list(s)
     # p.add_option('--list', '-l', dest="lists", help='specify the lists to be operated on', default=[]);
-    # p.add_option('--all', '-a', nargs=0, dest="lists", help='specify the lists to be operated on', default=['todo','tolearn','note','qa','resolution']);
-
     # options to update lists
     # p.add_option('--add','-a', action="store_true", help='gets current IP Address')
     # p.add_option('--update','-u', action="store_true", help='gets current IP Address')
@@ -78,13 +81,16 @@ def controller():
     #=============================================================#
     # Parsing options and perform appropriate actions accordingly #
     #=============================================================#
-    # if options.verbose:
-    #     VERBOSE=True
+
+    # debugging message for options and arguments
+    print options, arguments
 
     if options.create:
-        print "create lists"
+        if options.all: print "create all lists"
+        else:           print "create lists"
     elif options.show:
-        print "show lists"
+        if options.all: print "show all lists"
+        else:           print "show list"
     else:
         p.print_help()
 
