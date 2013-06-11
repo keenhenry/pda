@@ -1,69 +1,44 @@
 #!/usr/bin/env python
 
 import subprocess
-import optparse
 import re
+import argparse
 
 #==========================================================================
 #   This file is the pda cli 
 #==========================================================================
 
-# VERBOSE = False
-
-# functions to parse options
-def create(option, opt_str, value, parser, *args, **kwargs):
-    assert value is None
-    value = []
-
-    if not parser.rargs:
-        parser.error("-c option requires at least one argument")
-    else:
-        for arg in parser.rargs:
-            value.append(arg)
-
-    # consume arguments in rargs
-    del parser.rargs[:len(value)]
-
-    # set value for dest variable
-    setattr(parser.values, option.dest, value)
-
-def update(option, opt, value, parser):
-    print "update lists"
-
 # Function to control option parsing in Python
 def controller():
-    # global VERBOSE
 
-    # create instance of OptionParser Module 
-    p = optparse.OptionParser(description = 'A Personal Desktop Assistant to manage useful lists, like TODO list.',
-                              prog        = 'pda',
-                              version     = 'pda 0.1',
-                              usage       = '%prog [-c <list names>] [-s <list name>]')
+    # create instance of ArgumentParser Module 
+    p = argparse.ArgumentParser(
+            description = 'A Personal Desktop Assistant to manage useful lists, like TODO list.',
+            prog        = 'pda',
+            usage       = '%(prog)s [-c <list names>] lists'
+        )
 
     #========================#
     # Create Options objects #
     #========================#
 
     # option to create lists
-    p.add_option('--create', '-c', 
-            action='callback', 
-            callback=create, 
-            dest='create',
+    p.add_argument('-c', '--create',
+            nargs='+',
+            metavar='<list name>',
             help='create lists in database')
 
-    # option to display the content of a list
-    # this option takes ONE argument only
-    p.add_option('--show', '-s', 
-            action='store', 
-            dest='show',
-            nargs=1,
-            metavar="LISTNAME",
-            help='show contents of a list in database')
+    # option to display the content of lists
+    p.add_argument('show',
+            nargs='*',
+            metavar="lists",
+            help='show content of a lists in database')
 
     # option to include all the lists available in database for processing
-    p.add_option('--all', '-a',
-                 action='store_true',
-                 help='include all the lists in database to be operated on');
+    # p.add_argument('--all',
+    #              action='store_true',
+    #              default=False,
+    #              help='include all the lists in database to be operated on');
 
     # option to specify list(s)
     # p.add_option('--list', '-l', dest="lists", help='specify the lists to be operated on', default=[]);
@@ -75,22 +50,25 @@ def controller():
 
     # other options
     # p.add_option('--verbose', '-v', action = 'store_true', help='prints verbosely', default=False)
+    p.add_argument('--version', action='version', version='%(prog)s 0.1')
 
-    options, arguments = p.parse_args()
+    args = p.parse_args()
+
+    # debugging message for options and arguments
+    print args
 
     #=============================================================#
     # Parsing options and perform appropriate actions accordingly #
     #=============================================================#
-
-    # debugging message for options and arguments
-    print options, arguments
-
-    if options.create:
-        if options.all: print "create all lists"
-        else:           print "create lists"
-    elif options.show:
-        if options.all: print "show all lists"
-        else:           print "show list"
+    if args.create:
+        print args.create
+    elif args.show:
+        print args.show
+    #     if options.all: print "create all lists"
+    #     else:           print "create lists"
+    # elif args.show:
+    #     if options.all: print "show all lists"
+    #     else:           print "show list"
     else:
         p.print_help()
 
