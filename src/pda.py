@@ -15,7 +15,7 @@ def controller():
     p = argparse.ArgumentParser(
             description = 'A Personal Desktop Assistant to manage useful lists, like TODO list.',
             prog        = 'pda',
-            usage       = '%(prog)s [-c <list names>] lists'
+            usage       = '%(prog)s [-c] lists'
         )
 
     #========================#
@@ -24,15 +24,13 @@ def controller():
 
     # option to create lists
     p.add_argument('-c', '--create',
-            nargs='+',
-            metavar='<list name>',
+            action='store_true',
             help='create lists in database')
 
-    # option to display the content of lists
-    p.add_argument('show',
+    # positional argument to hold the lists to be to display
+    p.add_argument('lists',
             nargs='*',
-            metavar="lists",
-            help='show content of a lists in database')
+            help='tell pda which lists to work on')
 
     # option to include all the lists available in database for processing
     # p.add_argument('--all',
@@ -40,8 +38,6 @@ def controller():
     #              default=False,
     #              help='include all the lists in database to be operated on');
 
-    # option to specify list(s)
-    # p.add_option('--list', '-l', dest="lists", help='specify the lists to be operated on', default=[]);
     # options to update lists
     # p.add_option('--add','-a', action="store_true", help='gets current IP Address')
     # p.add_option('--update','-u', action="store_true", help='gets current IP Address')
@@ -61,14 +57,16 @@ def controller():
     # Parsing options and perform appropriate actions accordingly #
     #=============================================================#
     if args.create:
-        print args.create
-    elif args.show:
-        print args.show
-    #     if options.all: print "create all lists"
-    #     else:           print "create lists"
-    # elif args.show:
-    #     if options.all: print "show all lists"
-    #     else:           print "show list"
+        if args.lists:
+            print 'create lists:', args.lists
+        else:
+            # throw an error
+            print 'no lists to be created'
+    elif args.lists:
+        # no optional arguments at all, only positional argument exists
+        # this default behavior for this situation is to display contents of
+        # lists stored in the database
+        print 'show lists:', args.lists
     else:
         p.print_help()
 
