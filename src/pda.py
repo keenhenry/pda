@@ -15,7 +15,7 @@ def controller():
     p = argparse.ArgumentParser(
             description = 'A Personal Desktop Assistant to manage useful lists, like TODO list.',
             prog        = 'pda',
-            usage       = '%(prog)s [-c|-d|-w|-m|-s|-y] lists'
+            usage       = '%(prog)s [-i DESCRIPTION] [-c|-d|-w|-m|-s|-y] lists'
         )
 
     #========================#
@@ -27,7 +27,7 @@ def controller():
             action='store_true',
             help='create lists in database')
 
-    # positional argument to hold the lists to be to display
+    # positional argument to hold the lists to be displayed
     p.add_argument('lists',
             nargs='*',
             help='tell pda which lists to work on')
@@ -38,10 +38,18 @@ def controller():
     #              default=False,
     #              help='include all the lists in database to be operated on');
 
-    # options to update lists
-    # p.add_option('--add','-a', action="store_true", help='gets current IP Address')
+    # options to insert items into lists
+    p.add_argument('-i', '--insert',
+                   action="store", 
+                   type=str,
+                   metavar='DESCRIPTION',
+                   help='insert an item into lists')
+
+    # options to update items into lists
     # p.add_option('--update','-u', action="store_true", help='gets current IP Address')
+    # options to change priorities of items in lists
     # p.add_option('--priority','-p', action="store_true", help='gets current IP Address')
+    # options to delete items in lists
     # p.add_option('--remove','-r', action="store_true", help='gets current IP Address')
 
     # other options
@@ -69,6 +77,8 @@ def controller():
             # throw an error
             # you probably need an full blown Error object
             print 'no lists to be created'
+    elif args.insert:
+        print 'insert "' + args.insert + '" into lists:', args.lists
     elif args.lists:
         # this default behavior is to display contents of
         # lists stored in the database, the following conditional
