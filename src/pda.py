@@ -15,7 +15,7 @@ def controller():
     p = argparse.ArgumentParser(
             description = 'A Personal Desktop Assistant to manage useful lists, like TODO list.',
             prog        = 'pda',
-            usage       = '%(prog)s [-i DESCRIPTION] [-c|-d|-w|-m|-s|-y] lists'
+            usage       = '%(prog)s [-i DESCRIPTION] [-r LIST] [-n N ...] [-c|-d|-w|-m|-s|-y] lists'
         )
 
     #========================#
@@ -45,16 +45,25 @@ def controller():
                    metavar='DESCRIPTION',
                    help='insert an item into lists')
 
+    # options to remove items from lists
+    p.add_argument('-r', '--remove',
+                    action="store",
+                    metavar='LIST',
+                    help='remove items from a list')
+
     # options to update items into lists
     # p.add_option('--update','-u', action="store_true", help='gets current IP Address')
     # options to change priorities of items in lists
     # p.add_option('--priority','-p', action="store_true", help='gets current IP Address')
     # options to delete items in lists
-    # p.add_option('--remove','-r', action="store_true", help='gets current IP Address')
 
     # other options
     # p.add_option('--verbose', '-v', action = 'store_true', help='prints verbosely', default=False)
     p.add_argument('--version', action='version', version='%(prog)s 0.1')
+    p.add_argument('-n', 
+                    action='store', 
+                    nargs='+',
+                    help='specify item numbers from a list')
 
     # time period optional arguments
     p.add_argument('-d', action='store_true', help='daily content in a list')       # daily
@@ -79,6 +88,11 @@ def controller():
             print 'no lists to be created'
     elif args.insert:
         print 'insert "' + args.insert + '" into lists:', args.lists
+    elif args.remove:
+        if args.n is None:
+            print 'remove all the items from list:', args.remove
+        else:
+            print 'remove items', repr(args.n), 'from list:', args.remove
     elif args.lists:
         # this default behavior is to display contents of
         # lists stored in the database, the following conditional
