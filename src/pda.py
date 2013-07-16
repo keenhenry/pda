@@ -15,7 +15,7 @@ def controller():
     p = argparse.ArgumentParser(
             description = 'A Personal Desktop Assistant to manage useful lists, like TODO list.',
             prog        = 'pda',
-            usage       = '%(prog)s [-i DESCRIPTION] [-r LIST] [-n N ...] [-c|-d|-w|-m|-s|-y] lists'
+            usage       = '%(prog)s [-i DESCRIPTION] [-r LIST] [-u LIST] [-p LIST] [-n N ...] [-c|-d|-w|-m|-s|-y] lists'
         )
 
     #========================#
@@ -32,12 +32,6 @@ def controller():
             nargs='*',
             help='tell pda which lists to work on')
 
-    # option to include all the lists available in database for processing
-    # p.add_argument('--all',
-    #              action='store_true',
-    #              default=False,
-    #              help='include all the lists in database to be operated on');
-
     # options to insert items into lists
     p.add_argument('-i', '--insert',
                    action="store", 
@@ -45,17 +39,23 @@ def controller():
                    metavar='DESCRIPTION',
                    help='insert an item into lists')
 
+    # options to update items in a list
+    p.add_argument('-u', '--update',
+                   action="store", 
+                   metavar='LIST',
+                   help='update an item in a list')
+
+    # options to change priorities of items in lists
+    p.add_argument('-p', '--priority',
+                   action="store", 
+                   metavar='LIST',
+                   help='change the priority of an item in a list')
+
     # options to remove items from lists
     p.add_argument('-r', '--remove',
-                    action="store",
-                    metavar='LIST',
-                    help='remove items from a list')
-
-    # options to update items into lists
-    # p.add_option('--update','-u', action="store_true", help='gets current IP Address')
-    # options to change priorities of items in lists
-    # p.add_option('--priority','-p', action="store_true", help='gets current IP Address')
-    # options to delete items in lists
+                   action="store",
+                   metavar='LIST',
+                   help='remove items from a list')
 
     # other options
     # p.add_option('--verbose', '-v', action = 'store_true', help='prints verbosely', default=False)
@@ -88,6 +88,22 @@ def controller():
             print 'no lists to be created'
     elif args.insert:
         print 'insert "' + args.insert + '" into lists:', args.lists
+    elif args.update:
+        if args.n is None:
+            print 'Error: no item numer is specified; nothing is updated'
+        else:
+            if len(args.n) == 1:
+                print 'update item', repr(args.n), 'from list:', args.update
+            else:
+                print 'Error: too many items specified; only ONE item is allowed to be updated at one time'
+    elif args.priority:
+        if args.n is None:
+            print 'Error: no item numer is specified; nothing is updated'
+        else:
+            if len(args.n) == 1:
+                print 'change priority of item', repr(args.n), 'from list:', args.priority
+            else:
+                print 'Error: too many items specified; only ONE item is allowed to be updated at one time'
     elif args.remove:
         if args.n is None:
             print 'remove all the items from list:', args.remove
