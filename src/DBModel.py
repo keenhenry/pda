@@ -30,10 +30,22 @@ class MongoDB(DBModel):
 
         self.client.close()
 
+    def create(self, dbname, collection_names):
+        '''Create collection(s) in a database named 'dbname'
+           @dbname          : a database name string
+           @collection_names: a list of collection names
+        '''
+
+        for collection in collection_names:
+            self.client[dbname].createCollection[collection]
+
     def insert(self, dbname, collection_name, document):
         '''Insert a document (a row in SQL) into a mongodb collection
            mongodb creates the collection IMPLICITLY on the first insert
            operation.
+           @dbname         : a database name string
+           @collection_name: a string of collection name
+           @document       : a python dictionary containing things to be inserted
         '''
 
         self.client[dbname][collection_name].insert(document)
@@ -50,6 +62,7 @@ class MongoDB(DBModel):
 
         cursor = self.client[dbname][collection_name].find() 
 
+        print 'Records in ', collection_name, ':'
         for bson_obj in cursor:
             print bson_obj
 
@@ -59,34 +72,50 @@ class MongoDB(DBModel):
 
 def main():
 
-    # create a document for insertion
-    doc1 = {
-            'author': 'henry', 
-            'text'  : 'my first collection!',
-            'date'  : datetime.datetime.utcnow()
-           }
-
-    doc2 = {
-            'author': 'flora', 
-            'text'  : 'her first collection!',
-            'date'  : datetime.datetime.utcnow()
-           }
-
     # create mongodb database object
     db = DBModel.factory('MongoDB')
 
     # connect to mongodb database server
     db.connect('localhost', 27017)
 
+    # create collections
+    db.create('local', ['todo', 'tolearn'])
+
     # insert documents into collection 'tmp' in database 'local'
-    db.insert('local', 'tmp', doc1)
-    db.insert('local', 'tmp', doc2)
+    db.insert('local', 'todo', {'item': "look for jobs", \
+                                'year': False,           \
+                                'season': False,         \
+                                'month':  False,         \
+                                'week': False,           \
+                                'day': True,             \
+                                'prio': -1,              \
+                                'date': datetime.datetime.utcnow()})
+
+    db.insert('local', 'todo', {'item': "study triangulation algorithm", \
+                                'year': False,           \
+                                'season': False,         \
+                                'month':  False,         \
+                                'week': False,           \
+                                'day': True,             \
+                                'prio': -1,              \
+                                'date': datetime.datetime.utcnow()})
+
+    db.insert('local', 'tolearn', {'item': "GNU autotools",\
+                                    'year': False,           \
+                                    'season': False,         \
+                                    'month':  False,         \
+                                    'week': False,           \
+                                    'day': True,             \
+                                    'prio': -1,              \
+                                    'date': datetime.datetime.utcnow()})
 
     # query the documents stored in collection 'tmp' in database 'local'
-    db.query('local', 'tmp')
+    db.query('local', 'todo')
+    db.query('local', 'tolearn')
 
     # drop collection 'tmp' in database 'local'
-    db.drop('local', 'tmp')
+    db.drop('local', 'todo')
+    db.drop('local', 'tolearn')
 
     # close databse connection
     db.close()
