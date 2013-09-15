@@ -36,3 +36,6 @@ nosetests.xml
 
 # git
 .gitignore
+
+# tags file
+tags
