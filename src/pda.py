@@ -222,7 +222,7 @@ def controller(db):
     #======================#
     # Create Other Options #
     #======================#
-    p.add_argument('--version', action='version', version='%(prog)s 0.1')
+    p.add_argument('--version', action='version', version='%(prog)s 0.0.1')
 
     #=============================================================#
     # Parsing options and perform appropriate actions accordingly #
