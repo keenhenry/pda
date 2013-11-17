@@ -187,7 +187,7 @@ def controller(db):
     p = argparse.ArgumentParser(
             description = 'A Personal Desktop Assistant to manage useful lists, like TODO list.',
             prog        = 'pda',
-            usage       = '%(prog)s [-a SUMMARY] [-r N] listname'
+            usage       = '%(prog)s [OPTION]... [LISTNAME]'
         )
 
     #=============================#
@@ -300,7 +300,7 @@ def controller(db):
                 update_summary(issue, args.summary)
         else:
             print '{}: error: no such task (#{}) in the list'.format(p.prog, args.edit)
-    elif args.list:
+    elif args.list or args.listname:
         list_of_labels = []
         time_range     = None
 
