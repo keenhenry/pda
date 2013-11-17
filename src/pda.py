@@ -1,70 +1,57 @@
 #!/usr/bin/env python
 
-from github import Github
+# Author   : Henry Huang <keenhenry1109@gmail.com>
+# Copyright: This module has been placed in the public domain
+
+"""
+A simple command line tool to manage personal todo list, tolearn list, 
+toread list, and all sorts of other lists you can imagine.
+
+`pda` makes use of `PyGithub library <https://github.com/jacquev6/PyGithub>`_ 
+to communicate with Github Issue API; all the data are stored at Github Issue.
+
+This module includes following several functions:
+
+================
+Helper Functions
+================
+
+- `convert_priority_to_text()`:
+- `convert_milestone_title()`:
+- `is_label_created()`: test if a label exists in the Github Issue repository
+
+=======
+gettors
+=======
+
+=======
+settors
+=======
+
+=============
+Core Function
+=============
+
+- `controller()`: bridging function between Github Issue and terminal interface
+
+"""
+
 import argparse
 import os
+from github import Github
 
-#==========================================================================
-#   This file is the pda cli 
-#==========================================================================
-
-# define color symbolic constants
+# COLOR constants
 GREEN  = '009800'
 YELLOW = 'fbca04'
 RED    = 'e11d21'
 BLUE   = '0052cc'
 
-# define priority symbolic constants
+# PRIORITY constants
 URGENT_MUSTDO     = 5
 MUSTDO            = 4
 HIGH_IMPORTANCE   = 3
 MEDIUM_IMPORTANCE = 2
 LOW_IMPORTANCE    = 1
-
-# Helper functions
-def is_label_created(db, label_name):
-    created = False
-
-    for label in db.get_labels():
-        if label.name == label_name:
-            created = True
-            break
-
-    return created
-
-# get one label if already exists, otherwise create one in list!
-def get_one_label(db, label_name, label_color):
-
-    if is_label_created(db, label_name):
-        return db.get_label(label_name)
-    else:
-        return db.create_label(label_name, label_color)
-
-# collect one label into list_of_labels structure
-def collect_one_label(db, list_of_labels, label_name, label_color):
-    list_of_labels.append(get_one_label(db, label_name, label_color))
-
-def get_milestone_number(db, milestone_name):
-    number = None
-
-    for milestone in db.get_milestones():
-        if milestone.title == milestone_name:
-            number = milestone.number
-            break
-
-    return number
-
-# get the issue number of a task given @issue_number
-# if not found, return None
-def get_issue_number(db, issue_number):
-    number = None
-
-    for issue in db.get_issues(state='open'):
-        if issue.number == issue_number:
-            number = issue.number
-            break
-
-    return number
 
 def convert_priority_to_text(priority):
     prio = ''
@@ -82,12 +69,6 @@ def convert_priority_to_text(priority):
 
     return prio
 
-# assign priority to a task
-def assign_priority(args, db, list_of_labels):
-    if args.priority:
-        prio = convert_priority_to_text(args.priority)
-        collect_one_label(db, list_of_labels, prio, YELLOW)
-
 def convert_milestone_title(time):
     title = ''
 
@@ -104,6 +85,53 @@ def convert_milestone_title(time):
 
     return title
 
+def is_label_created(db, label_name):
+    '''
+    :param db: :class:`github.Repository.Repository`
+    :param label_name: string
+    :rtype: Boolean
+    '''
+    created = False
+
+    for label in db.get_labels():
+        if label.name == label_name:
+            created = True
+            break
+
+    return created
+
+def get_milestone_number(db, milestone_name):
+    number = None
+
+    for milestone in db.get_milestones():
+        if milestone.title == milestone_name:
+            number = milestone.number
+            break
+
+    return number
+
+def get_issue_number(db, issue_number):
+    number = None
+
+    for issue in db.get_issues(state='open'):
+        if issue.number == issue_number:
+            number = issue.number
+            break
+
+    return number
+
+def get_one_label(db, label_name, label_color):
+
+    # get one label if already exists, otherwise create one in list!
+    if is_label_created(db, label_name):
+        return db.get_label(label_name)
+    else:
+        return db.create_label(label_name, label_color)
+
+# collect one label into list_of_labels structure
+def collect_one_label(db, list_of_labels, label_name, label_color):
+    list_of_labels.append(get_one_label(db, label_name, label_color))
+
 # get one milestone if already exists, otherwise create one in list!
 def get_one_milestone(db, milestone_title):
     milestone_number = get_milestone_number(db, milestone_title)
@@ -111,6 +139,13 @@ def get_one_milestone(db, milestone_title):
         return db.get_milestone(milestone_number)
     else:
         return db.create_milestone(milestone_title)
+
+
+# assign priority to a task
+def assign_priority(args, db, list_of_labels):
+    if args.priority:
+        prio = convert_priority_to_text(args.priority)
+        collect_one_label(db, list_of_labels, prio, YELLOW)
 
 # assign milestone to a task
 def assign_milestone(args, db):
@@ -145,7 +180,7 @@ def update_one_label(db, issue, label_name, label_color):
 def update_summary(issue, summary):
     issue.edit(title=summary)
 
-# Function to control command-line argument parsing
+
 def controller(db):
 
     # create instance of ArgumentParser Module 
@@ -306,6 +341,7 @@ def main():
 
     # get todo repo
     repo = g.get_repo('keenhenry/todo')
+    # repo = g.get_repo('keenhenry/lists')
 
     # pass github repo object to controller
     controller(repo)
