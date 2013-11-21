@@ -16,17 +16,36 @@ This module includes following several functions:
 Helper Functions
 ================
 
-- `convert_priority_to_text()`:
-- `convert_milestone_title()`:
+- `convert_priority_to_text()`: convert numeric priority to text label name
+- `convert_milestone_title()`: convert time period to more descriptive milestone name
 - `is_label_created()`: test if a label exists in the Github Issue repository
 
 =======
 gettors
 =======
 
+- `get_milestone_number()`: retrieve milestone number from Issue repository, given the milestone's name
+- `get_issue_number()`: retrieve issue number from Issue repository, given the issue's number
+- `get_one_label()`: retrieve a label from Issue repository
+- `collect_one_label()`: collect one label into a list of labels
+- `get_one_milestone()`: retrieve a milestone from Issue repository, given milestone's name
+
 =======
 settors
 =======
+
+- `create_priority()`: create priority attribute for an issue
+- `create_milestone()`: create milestone attribute for an issue
+- `create_listname()`: create listname attribute for an issue
+- `update_milestone()`: update issue milestone
+- `update_one_label()`: update issue one label
+- `update_summary()`: update issue title/summary
+
+=====
+print
+=====
+
+- `print_pretty_tasks_info()`: output tasks information in pretty formatted text on commandline
 
 =============
 Core Function
@@ -38,6 +57,7 @@ Core Function
 
 import argparse
 import os
+import github.GithubObject
 from github import Github
 
 # COLOR constants
@@ -54,6 +74,10 @@ MEDIUM_IMPORTANCE = 2
 LOW_IMPORTANCE    = 1
 
 def convert_priority_to_text(priority):
+    """
+    :param priority: integer
+    :rtype: string
+    """
     prio = ''
 
     if   priority == URGENT_MUSTDO: 
@@ -70,6 +94,10 @@ def convert_priority_to_text(priority):
     return prio
 
 def convert_milestone_title(time):
+    """
+    :param time: string
+    :rtype: string
+    """
     title = ''
 
     if   time == 'd': 
@@ -86,11 +114,11 @@ def convert_milestone_title(time):
     return title
 
 def is_label_created(db, label_name):
-    '''
+    """
     :param db: :class:`github.Repository.Repository`
     :param label_name: string
     :rtype: Boolean
-    '''
+    """
     created = False
 
     for label in db.get_labels():
@@ -101,6 +129,11 @@ def is_label_created(db, label_name):
     return created
 
 def get_milestone_number(db, milestone_name):
+    """
+    :param db: :class:`github.Repository.Repository`
+    :param milestone_name: string
+    :rtype: None or integer
+    """
     number = None
 
     for milestone in db.get_milestones():
@@ -111,6 +144,11 @@ def get_milestone_number(db, milestone_name):
     return number
 
 def get_issue_number(db, issue_number):
+    """
+    :param db: :class:`github.Repository.Repository`
+    :param issue_number: integer
+    :rtype: None or integer
+    """
     number = None
 
     for issue in db.get_issues(state='open'):
@@ -121,19 +159,33 @@ def get_issue_number(db, issue_number):
     return number
 
 def get_one_label(db, label_name, label_color):
+    """
+    :param db: :class:`github.Repository.Repository`
+    :param label_name: string
+    :param label_color: string
+    :rtype: :class:`github.Label.Label`
+    """
 
-    # get one label if already exists, otherwise create one in list!
     if is_label_created(db, label_name):
         return db.get_label(label_name)
     else:
         return db.create_label(label_name, label_color)
 
-# collect one label into list_of_labels structure
 def collect_one_label(db, list_of_labels, label_name, label_color):
+    """
+    :param db: :class:`github.Repository.Repository`
+    :param list_of_labels: list of :class:`github.Label.Label`s
+    :param label_name: string
+    :param label_color: string
+    """
     list_of_labels.append(get_one_label(db, label_name, label_color))
 
-# get one milestone if already exists, otherwise create one in list!
 def get_one_milestone(db, milestone_title):
+    """
+    :param db: :class:`github.Repository.Repository`
+    :param milestone_title: string
+    :rtype: :class:`github.Milestone.Milestone`
+    """
     milestone_number = get_milestone_number(db, milestone_title)
     if milestone_number:
         return db.get_milestone(milestone_number)
@@ -141,32 +193,54 @@ def get_one_milestone(db, milestone_title):
         return db.create_milestone(milestone_title)
 
 
-# assign priority to a task
-def assign_priority(args, db, list_of_labels):
+def create_priority(args, db, list_of_labels):
+    """
+    :param args: :class:`argparse.Namespace`
+    :param db: :class:`github.Repository.Repository`
+    :param list_of_labels: list of :class:`github.Label.Label`s
+    """
     if args.priority:
         prio = convert_priority_to_text(args.priority)
         collect_one_label(db, list_of_labels, prio, YELLOW)
 
-# assign milestone to a task
-def assign_milestone(args, db):
+def create_milestone(args, db):
+    """
+    :param args: :class:`argparse.Namespace`
+    :param db: :class:`github.Repository.Repository`
+    :rtype: :class:`github.Milestone.Milestone` or `github.GithubObject.NotSet`
+    """
     if args.time:
-        title      = convert_milestone_title(args.time)
-        time_range = get_one_milestone(db, title)
+        return get_one_milestone(db, convert_milestone_title(args.time))
+    else:
+        return github.GithubObject.NotSet
 
-# assign list name to a task
-def assign_listname(args, db, list_of_labels):
+def create_listname(args, db, list_of_labels):
+    """
+    :param args: :class:`argparse.Namespace`
+    :param db: :class:`github.Repository.Repository`
+    :param list_of_labels: list of :class:`github.Label.Label`s
+    """
     if args.listname != '':
         collect_one_label(db, list_of_labels, args.listname, GREEN)
 
-# update milestone information for a task
-def update_mildestone(db, issue, time):
+def update_milestone(db, issue, time):
+    """
+    :param db: :class:`github.Repository.Repository`
+    :param issue: :class:`github.Issue.Issue`
+    :param time: string
+    """
     title = convert_milestone_title(time)
 
     if issue.milestone and issue.milestone.title != title:
         issue.edit(milestone=get_one_milestone(db, title))
 
-# update priority information for a task
 def update_one_label(db, issue, label_name, label_color):
+    """
+    :param db: :class:`github.Repository.Repository`
+    :param issue: :class:`github.Issue.Issue`
+    :param label_name: string
+    :param label_color: string
+    """
     # remove original priority from task
     for label in issue.get_labels():
         if label.color == label_color and label.name != label_name:
@@ -176,12 +250,39 @@ def update_one_label(db, issue, label_name, label_color):
     # add new priority to task
     issue.add_to_labels(get_one_label(db, label_name, label_color))
 
-# update summary of a task
 def update_summary(issue, summary):
+    """
+    :param issue: :class:`github.Issue.Issue`
+    :param summary: string
+    """
     issue.edit(title=summary)
 
 
+def print_pretty_tasks_info(db, list_of_labels, time_range):
+    """
+    :param db: :class:`github.Repository.Repository`
+    :param list_of_labels: list of :class:`github.Label.Label`s
+    :param time_range: :class:`github.Milestone.Milestone`
+    """
+    print
+    table_titles = ['TASK#', 'SUMMARY', 'LIST TYPE', 'DUE TIME', 'PRIORITY']
+    print '{:<5}  {:<60}  {:<9}  {:<8}  {:<8}'.format(*table_titles)
+    print '{:=<5}  {:=<60}  {:=<9}  {:=<8}  {:=<8}'.format(*['','','','',''])
+    for issue in db.get_issues(labels=list_of_labels, milestone=time_range, state='open'):
+        for label in issue.labels:
+            if label.color == YELLOW: prio = label.name
+            if label.color ==  GREEN: list_type = label.name
+        print '{:<5}  {:<60}  {:<9}  {:<8}  {:<8}'.format(issue.number, 
+                                                          issue.title, 
+                                                          list_type, 
+                                                          issue.milestone.title, 
+                                                          prio)
+
+
 def controller(db):
+    """
+    :param db: :class:`github.Repository.Repository`
+    """
 
     # create instance of ArgumentParser Module 
     p = argparse.ArgumentParser(
@@ -270,17 +371,13 @@ def controller(db):
             issue = db.get_issue(issue_number)
             issue.edit(state='closed')
         else:
-            print '{}: error: no such task (#{}) in the list'.format(p.prog, args.edit)
+            print '{}: error: no such task (#{}) in the list'.format(p.prog, args.remove)
     elif args.add:
         list_of_labels = []
-        time_range     = None
 
-        assign_listname (args, db, list_of_labels)
-        assign_priority (args, db, list_of_labels)
-
-        if args.time:
-            milestone_title = convert_milestone_title(args.time)
-            time_range      = get_one_milestone(db, milestone_title)
+        create_listname (args, db, list_of_labels)
+        create_priority (args, db, list_of_labels)
+        time_range = create_milestone(args, db)
 
         # create a task in list
         db.create_issue(args.add, labels=list_of_labels, milestone=time_range)
@@ -291,7 +388,7 @@ def controller(db):
             issue = db.get_issue(issue_number)
 
             if args.time:
-                update_mildestone(db, issue, args.time)
+                update_milestone(db, issue, args.time)
             if args.priority:
                 update_one_label(db, issue, convert_priority_to_text(args.priority), YELLOW)
             if args.listname != '':
@@ -305,7 +402,7 @@ def controller(db):
         time_range     = None
 
         # no default value for priority, so we can assign it directly
-        assign_priority(args, db, list_of_labels)
+        create_priority(args, db, list_of_labels)
 
         # default value for listname is 'todo'
         list_type = get_one_label(db, 'todo', GREEN) if args.listname == '' else \
@@ -317,19 +414,7 @@ def controller(db):
                      else get_one_milestone(db, 'day')
 
         # print out tasks in a friendly format:
-        print
-        table_titles = ['TASK#', 'SUMMARY', 'LIST TYPE', 'DUE TIME', 'PRIORITY']
-        print '{:<5}  {:<60}  {:<9}  {:<8}  {:<8}'.format(*table_titles)
-        print '{:=<5}  {:=<60}  {:=<9}  {:=<8}  {:=<8}'.format(*['','','','',''])
-        for issue in db.get_issues(labels=list_of_labels, milestone=time_range, state='open'):
-            for label in issue.labels:
-                if label.color == YELLOW: prio = label.name
-                if label.color ==  GREEN: list_type = label.name
-            print '{:<5}  {:<60}  {:<9}  {:<8}  {:<8}'.format(issue.number, 
-                                                              issue.title, 
-                                                              list_type, 
-                                                              issue.milestone.title, 
-                                                              prio)
+        print_pretty_tasks_info(db, list_of_labels, time_range)
     else:
         p.print_help()
 
@@ -340,8 +425,8 @@ def main():
     g = Github(token)
 
     # get todo repo
-    repo = g.get_repo('keenhenry/todo')
-    # repo = g.get_repo('keenhenry/lists')
+    # repo = g.get_repo('keenhenry/todo')
+    repo = g.get_repo('keenhenry/lists')
 
     # pass github repo object to controller
     controller(repo)
