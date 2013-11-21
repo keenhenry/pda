@@ -350,11 +350,6 @@ def controller(db):
                    metavar='SUMMARY',
                    help='assign SUMMARY to a task in list')
 
-    # options to show tasks in list
-    p.add_argument('-l', '--list',
-                   action="store_true",
-                   help='show the tasks in list')
-
     #======================#
     # Create Other Options #
     #======================#
@@ -397,7 +392,7 @@ def controller(db):
                 update_summary(issue, args.summary)
         else:
             print '{}: error: no such task (#{}) in the list'.format(p.prog, args.edit)
-    elif args.list or args.listname:
+    elif args.listname:
         list_of_labels = []
         time_range     = None
 
