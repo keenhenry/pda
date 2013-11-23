@@ -100,15 +100,15 @@ def convert_milestone_title(time):
     """
     title = ''
 
-    if   time == 'd': 
+    if   time == 'd':
         title = 'day'
-    elif time == 'w': 
+    elif time == 'w':
         title = 'week'
-    elif time == 'm': 
+    elif time == 'm':
         title = 'month'
-    elif time == 's': 
+    elif time == 's':
         title = 'season'
-    else            : 
+    else            :
         title = 'year'
 
     return title
@@ -220,7 +220,7 @@ def create_listname(args, db, list_of_labels):
     :param db: :class:`github.Repository.Repository`
     :param list_of_labels: list of :class:`github.Label.Label`s
     """
-    if args.listname != '':
+    if args.listname:
         collect_one_label(db, list_of_labels, args.listname, GREEN)
 
 def update_milestone(db, issue, time):
@@ -272,11 +272,11 @@ def print_pretty_tasks_info(db, list_of_labels, time_range):
         for label in issue.labels:
             if label.color == YELLOW: prio = label.name
             if label.color ==  GREEN: list_type = label.name
-        print '{:<5}  {:<60}  {:<9}  {:<8}  {:<8}'.format(issue.number, 
-                                                          issue.title, 
-                                                          list_type, 
-                                                          issue.milestone.title, 
-                                                          prio)
+        print u'{:<5}  {:<60}  {:<9}  {:<8}  {:<8}'.format(issue.number, 
+                                                           issue.title, 
+                                                           list_type, 
+                                                           issue.milestone.title, 
+                                                           prio)
 
 
 def controller(db):
@@ -286,9 +286,13 @@ def controller(db):
 
     # create instance of ArgumentParser Module 
     p = argparse.ArgumentParser(
-            description = 'A Personal Desktop Assistant to manage useful lists, like TODO list.',
+            description = '''A Personal Desktop Assistant to manage useful lists, 
+                             like TODO, TOREAD lists. If [OPTION] is omitted, 
+                             the default behavior is to print out the content of the list 
+                             named [listname]; if both [OPTION] and [listname] are omitted, 
+                             then default behavior is to print out the content of TODO list.''',
             prog        = 'pda',
-            usage       = '%(prog)s [OPTION]... [LISTNAME]'
+            usage       = '%(prog)s [OPTION]... [listname]'
         )
 
     #=============================#
@@ -298,7 +302,6 @@ def controller(db):
     p.add_argument('listname',
                    nargs='?',
                    type=str,
-                   default='',
                    help='tell pda which list to work on')
     
     #================#
@@ -317,23 +320,23 @@ def controller(db):
                    action="store", 
                    type=str,
                    metavar='SUMMARY',
-                   help='add a task summarized with SUMMARY into list')
+                   help='add a task summarized as SUMMARY into list')
 
-    # option to add validity period associated with a task
+    # option to specify validity period associated with a task
     p.add_argument('-t', '--time',
                    action="store", 
                    type=str,
                    choices='dwmsy',
                    metavar='PERIOD',
-                   help='specify the PERIOD for this task')
+                   help='specify milestone PERIOD of a task')
 
-    # option to assign priority to a task
+    # option to specify priority of a task
     p.add_argument('-p', '--priority',
                    action="store", 
                    type=int,
                    choices=[1,2,3,4,5],
                    metavar='PRIO',
-                   help='assign priority PRIO to a task in list')
+                   help='specify priority PRIO of a task')
 
     # options to update a task in list
     p.add_argument('-e', '--edit',
@@ -342,13 +345,13 @@ def controller(db):
                    metavar='N',
                    help='update a task numberd N in list')
 
-    # option assign task summary to a task
+    # option to specify task summary
     p.add_argument('-s', '--summary',
                    action="store",
                    type=str,
                    default='',
                    metavar='SUMMARY',
-                   help='assign SUMMARY to a task in list')
+                   help='specify SUMMARY of a task')
 
     #======================#
     # Create Other Options #
@@ -374,11 +377,10 @@ def controller(db):
         create_priority (args, db, list_of_labels)
         time_range = create_milestone(args, db)
 
-        # create a task in list
         db.create_issue(args.add, labels=list_of_labels, milestone=time_range)
     elif args.edit:
-
         issue_number = get_issue_number(db, args.edit)
+
         if issue_number:
             issue = db.get_issue(issue_number)
 
@@ -386,32 +388,36 @@ def controller(db):
                 update_milestone(db, issue, args.time)
             if args.priority:
                 update_one_label(db, issue, convert_priority_to_text(args.priority), YELLOW)
-            if args.listname != '':
+            if args.listname:
                 update_one_label(db, issue, args.listname, GREEN)
             if args.summary != '':
                 update_summary(issue, args.summary)
         else:
             print '{}: error: no such task (#{}) in the list'.format(p.prog, args.edit)
-    elif args.listname:
+    elif args.listname: # print out contents in a list
         list_of_labels = []
-        time_range     = None
 
-        # no default value for priority, so we can assign it directly
+        # get the priority of the tasks which will be displayed
+        # no default value for priority label is assigned
         create_priority(args, db, list_of_labels)
 
-        # default value for listname is 'todo'
-        list_type = get_one_label(db, 'todo', GREEN) if args.listname == '' else \
-                    get_one_label(db, args.listname, GREEN)
-        list_of_labels.append(list_type)
+        # get the listname of the tasks which will be displayed
+        # if not specified: default value for listname is 'todo'
+        if args.listname:
+            list_of_labels.append(get_one_label(db, args.listname, GREEN))
+        else:
+            list_of_labels.append(get_one_label(db, 'todo', GREEN))
 
-        # default value for milestone is 'day'
-        time_range = get_one_milestone(db, convert_milestone_title(args.time)) if args.time \
-                     else get_one_milestone(db, 'day')
+        # get the milestone of the tasks which will be displayed
+        # if not specified, default value for milestone is 'week'
+        if args.time: 
+            time_range = get_one_milestone(db, convert_milestone_title(args.time))
+        else:
+            time_range = get_one_milestone(db, 'week')
 
-        # print out tasks in a friendly format:
         print_pretty_tasks_info(db, list_of_labels, time_range)
-    else:
-        p.print_help()
+    else: # print out contents for all tasks in 'todo' list
+        print_pretty_tasks_info(db, [get_one_label(db, 'todo', GREEN)], '*')
 
 def main():
 
