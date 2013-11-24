@@ -396,6 +396,7 @@ def controller(db):
             print '{}: error: no such task (#{}) in the list'.format(p.prog, args.edit)
     elif args.listname: # print out contents in a list
         list_of_labels = []
+        time_range     = '*'
 
         # get the priority of the tasks which will be displayed
         # no default value for priority label is assigned
@@ -409,11 +410,9 @@ def controller(db):
             list_of_labels.append(get_one_label(db, 'todo', GREEN))
 
         # get the milestone of the tasks which will be displayed
-        # if not specified, default value for milestone is 'week'
+        # if not specified, default value for milestone is ALL
         if args.time: 
             time_range = get_one_milestone(db, convert_milestone_title(args.time))
-        else:
-            time_range = get_one_milestone(db, 'week')
 
         print_pretty_tasks_info(db, list_of_labels, time_range)
     else: # print out contents for all tasks in 'todo' list
