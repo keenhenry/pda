@@ -56,9 +56,11 @@ Core Function
 """
 
 import argparse
+import shelve
 import os
 import github.GithubObject
 from github import Github
+
 
 # COLOR constants
 GREEN  = '009800'
@@ -72,6 +74,10 @@ MUSTDO            = 4
 HIGH_IMPORTANCE   = 3
 MEDIUM_IMPORTANCE = 2
 LOW_IMPORTANCE    = 1
+
+# repo name
+REPO_NAME = 'keenhenry/lists'
+# REPO_NAME = 'keenhenry/todo'
 
 def convert_priority_to_text(priority):
     """
@@ -420,16 +426,25 @@ def controller(db):
 
 def main():
 
-    # create a Github object to interact with Github
-    token = os.environ['PDA_AUTH']
-    g = Github(token)
+    # open local persistent object store
+    objstore = os.environ['HOME'] + "/" + ".pdastore"
+    storehdl = shelve.open(objstore, protocol=-1)
 
-    # get todo repo
-    # repo = g.get_repo('keenhenry/todo')
-    repo = g.get_repo('keenhenry/lists')
+    # create a Github Repository object to interact with Github
+    # and store that object into a persistent local object store
+    if not storehdl.has_key('GITHUB_REPO'):
+        g = Github(os.environ['PDA_AUTH']) 
+        storehdl['GITHUB_REPO'] = g.get_repo(REPO_NAME)
+
+    # retrieve github repo object from local persistent store
+    repo = storehdl['GITHUB_REPO']
 
     # pass github repo object to controller
     controller(repo)
+
+    # write the object back to persistent store after done with it
+    storehdl['GITHUB_REPO'] = repo
+    storehdl.close()
 
 if __name__ == '__main__':
     main()
