@@ -401,19 +401,12 @@ def controller(db):
         else:
             print '{}: error: no such task (#{}) in the list'.format(p.prog, args.edit)
     elif args.listname: # print out contents in a list
-        list_of_labels = []
+        list_of_labels = [get_one_label(db, args.listname, GREEN)]
         time_range     = '*'
 
         # get the priority of the tasks which will be displayed
         # no default value for priority label is assigned
         create_priority(args, db, list_of_labels)
-
-        # get the listname of the tasks which will be displayed
-        # if not specified: default value for listname is 'todo'
-        if args.listname:
-            list_of_labels.append(get_one_label(db, args.listname, GREEN))
-        else:
-            list_of_labels.append(get_one_label(db, 'todo', GREEN))
 
         # get the milestone of the tasks which will be displayed
         # if not specified, default value for milestone is ALL
@@ -421,8 +414,21 @@ def controller(db):
             time_range = get_one_milestone(db, convert_milestone_title(args.time))
 
         print_pretty_tasks_info(db, list_of_labels, time_range)
-    else: # print out contents for all tasks in 'todo' list
-        print_pretty_tasks_info(db, [get_one_label(db, 'todo', GREEN)], '*')
+    else: 
+        # print out contents of several lists
+        # default behavior is to print out all tasks in every list
+        list_of_labels = []
+        time_range     = '*'
+
+        if args.time and not args.priority:
+            time_range = get_one_milestone(db, convert_milestone_title(args.time))
+        elif args.priority and not args.time:
+            create_priority(args, db, list_of_labels)
+        elif args.priority and args.time:
+            time_range = get_one_milestone(db, convert_milestone_title(args.time))
+            create_priority(args, db, list_of_labels)
+
+        print_pretty_tasks_info(db, list_of_labels, time_range)
 
 def main():
 
