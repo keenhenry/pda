@@ -293,10 +293,10 @@ def controller(db):
     # create instance of ArgumentParser Module 
     p = argparse.ArgumentParser(
             description = '''A Personal Desktop Assistant to manage useful lists, 
-                             like TODO, TOREAD lists. If [OPTION] is omitted, 
+                             such as TODO, TOLEARN, TOREAD, etc. If [OPTION] is omitted, 
                              the default behavior is to print out the content of the list 
                              named [listname]; if both [OPTION] and [listname] are omitted, 
-                             then default behavior is to print out the content of TODO list.''',
+                             default behavior is to print out contents of all lists.''',
             prog        = 'pda',
             usage       = '%(prog)s [OPTION]... [listname]'
         )

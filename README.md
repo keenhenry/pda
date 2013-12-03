@@ -1,52 +1,37 @@
-pda - Personal Desktop Assistant
+Personal Desktop Assistant - pda
 ================================
 
-pda is a commandline tool used to manage several useful lists in your life - namely, TODO, TOLEARN, NOTE, QA and RESOLUTIONS. Lists are 
-stored in a database, and are accessed through pda commandline interface, which is explained below:
+pda is a command line tool used to manage useful lists in your daily ife - such as TODO, 
+TOLEARN and TOREAD lists, etc. You can use it to create as many lists as you want.
+
+Lists data are stored on [Github Issue](bit.ly/18YAS2p) and accessed through pda command 
+line interface, which is explained below:
 
 ## Synopsis
 
-List names can be abbreviated as D, L, N, Q, R, respectively.
+List names can be any string you want, I currently have __todo__, __tolearn__ and __toread__ 
+as available list names stored on _Github Issue_ database.
 
-### CREATE lists 
-```bash
-# to create {todo|tolearn|note|qa|resolution} list(s) in the database
-$ pda -c <list name(s)>
-
-# to create all the lists in the database
-$ pda -ca 
-
-# import a file into a list, the type of file supported will need to be determined
-# the syntax of the content of the file also needs to be determined
-$ pda -ci <list name> <filepath>
-```
-
-### QUERY lists
+### CREATE tasks in a list
 
 ```bash
-# to list daily, weekly, weekendly, monthly, seasonly, yearly contents of 
-# {todo|tolearn|note|qa|resolution} list on commandline
-$ pda -l <list name> -[d|w|e|m|s|y]
-
-# to list daily, weekly, weekendly, monthly, seasonly, yearly contents of 
-# all the list{s} on commandline
-$ pda -la -[d|w|e|m|s|y]
+# add a task in a list
+$ pda -a <task summary text> [-t PERIOD] [-p PRIORITY] <listname>
 ```
 
 ### UPDATE lists
 
 ```bash
-# to add an item in {todo|tolearn|note|qa|resolution} list
-# -d meaning daily plan, -w weekly, -e weekend, -m monthly, -s seasonly, -y yearly
-# for list 'note' and 'qa', only daily is allowed and defaulted.
-$ pda -a <list name> -[d|w|e|m|s|y] <a description of the thing you want to note down>
+# delete a task numbered N
+$ pda -r N
 
-# to update an item in {todo|tolearn|note|qa|resolution} list
-$ pda -u <list name> <item number> <item content in text>
+# to update an item in list
+$ pda -e <list name> <item number> <item content in text>
+```
 
-# to update the priority of an item in {todo|tolearn|note|qa|resolution} list
-$ pda -p <list name> <item number> <priority #>
+### QUERY list contents
 
-# to delete items in {todo|tolearn|note|qa|resolution} list
-$ pda -d <list name> <a list of item numbers>
+```bash
+# 
+$ pda <listname>
 ```
