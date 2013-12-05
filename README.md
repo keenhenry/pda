@@ -4,9 +4,12 @@ Personal Desktop Assistant - pda
 `pda` is a command line tool used to manage useful lists in your daily ife - such as TODO, 
 TOLEARN and TOREAD lists, etc. You can use it to create as many lists as you want.
 
-## Tool Dependency
-
 ## Install
+
+```bash
+# blablablablabla
+```
+
 
 ## Synopsis
 
