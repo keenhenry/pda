@@ -7,7 +7,7 @@ TOLEARN and TOREAD lists, etc. You can use it to create as many lists as you wan
 ## Install
 
 ```bash
-# blablablablabla
+# to be completed later
 ```
 
 
