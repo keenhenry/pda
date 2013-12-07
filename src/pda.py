@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-# Author   : Henry Huang <keenhenry1109@gmail.com>
-# Copyright: This module has been placed in the public domain
-
 """
 A simple command line tool to manage personal todo list, tolearn list, 
 toread list, and all sorts of other lists you can imagine.
