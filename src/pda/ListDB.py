@@ -7,11 +7,9 @@
 Helper Functions
 ================
 
-
 =======
 gettors
 =======
-
 
 =======
 settors
@@ -263,16 +261,32 @@ class ListDB(object):
         self.__github    = Github(os.environ['PDA_AUTH'])
         self.__repo      = self.__github.get_repo(self.__repo_name)
 
-    def _dummy_method(self):
-        print self.__repo_name
+    def _has_task(self, task_number):
+        """
+        :param task_number: integer
+        :rtype: True or False
+        """
+
+        assert task_number isinstance(task_number, (int, long)), task_number
+
+        hasTask = False
+
+        for issue in self.__repo.get_issues(state='open'):
+            if task_number == issue.number:
+                hasTask = True
+                break
+
+        return hasTask
 
     def sync_local_dbstore(self):
+        """
+        """
         print
 
     def sync_remote_dbstore(self):
         print
 
-    def remove_task(self):
+    def remove_task(self, task_number):
         print
 
     def add_task(self):
