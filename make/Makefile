@@ -10,8 +10,8 @@ all:
 install:
 	@echo ""
 	mkdir -p $(INSTALL_DIR)
-	chmod u+x $(SOURCE_DIR)/pda.py
-	cp -p $(SOURCE_DIR)/pda.py $(INSTALL_DIR)/pda
+	chmod u+x $(SOURCE_DIR)/pda/pda.py
+	cp -p $(SOURCE_DIR)/pda/pda.py $(INSTALL_DIR)/pda
 	@echo "Installation completed. The binary is installed in '$(INSTALL_DIR)'"
 	@echo ''
 
