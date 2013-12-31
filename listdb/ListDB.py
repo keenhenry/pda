@@ -267,7 +267,7 @@ class ListDB(object):
         :rtype: True or False
         """
 
-        assert task_number isinstance(task_number, (int, long)), task_number
+        assert isinstance(task_number, (int, long)), task_number
 
         hasTask = False
 
@@ -319,7 +319,6 @@ def main():
     # storehdl['GITHUB_REPO'] = repo
     # storehdl.close()
     db = ListDB()
-    # db._dummy_method()
 
 if __name__ == '__main__':
     main()
