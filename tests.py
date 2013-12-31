@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-"""
-This is a module to command line tool `pda`
-"""
-
-import unittest
 from listdb.ListDB import ListDB
 
-# test fixture to test ListDB class
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
+
+
 class ListDBTests(unittest.TestCase):
 
     @classmethod
