@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
 """
-This is a module to unit-test `ListDB` class.
+This is a module to command line tool `pda`
 """
 
-from ListDB import ListDB
 import unittest
+from listdb.ListDB import ListDB
 
+# test fixture to test ListDB class
 class ListDBTests(unittest.TestCase):
 
     @classmethod
@@ -16,13 +17,12 @@ class ListDBTests(unittest.TestCase):
     def testHasTaskFalse(self):
         self.assertFalse(self.db._has_task(-1))
         self.assertFalse(self.db._has_task(-2))
-        self.assertFalse(self.db._has_task('why'))
 
     def testHasTaskTrue(self):
-        self.assertFalse(self.db._has_task(4))
-        self.assertFalse(self.db._has_task(5))
-        self.assertFalse(self.db._has_task(6))
-        self.assertFalse(self.db._has_task(8))
+        self.assertTrue(self.db._has_task(4))
+        self.assertTrue(self.db._has_task(5))
+        self.assertTrue(self.db._has_task(6))
+        self.assertTrue(self.db._has_task(8))
 
     @classmethod
     def tearDownClass(cls):
