@@ -16,6 +16,6 @@ install:
 	@echo ''
 
 clean:
-	rm $(INSTALL_DIR) -rf
+	rm $(PROJ_ROOT)/*.pyc -rf
 
 .PHONY: install
