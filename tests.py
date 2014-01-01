@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from listdb.ListDB import ListDB
+from listdb.GithubIssues import ListDB
 
 try:
     import unittest2 as unittest
