@@ -16,6 +16,6 @@ install:
 	@echo ''
 
 clean:
-	rm $(PROJ_ROOT)/*.pyc -rf
+	rm $(PROJ_ROOT)/*.pyc $(PROJ_ROOT)/MANIFEST -rf
 
 .PHONY: install
