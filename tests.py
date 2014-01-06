@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import requests
+import shelve
+import os
 from listdb.GithubIssues import ListDB
 
 try:
@@ -10,25 +13,51 @@ except ImportError:
 
 class ListDBTests(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        cls.db = ListDB()
+    def setUp(self):
+        self.db = ListDB()
 
-    def testHasTaskFalse(self):
-        self.assertFalse(self.db._has_task(-1))
-        self.assertFalse(self.db._has_task(-2))
+    def testSyncLocalDBStore(self):
 
-    def testHasTaskTrue(self):
-        self.assertTrue(self.db._has_task(4))
-        self.assertTrue(self.db._has_task(5))
-        self.assertTrue(self.db._has_task(6))
-        self.assertTrue(self.db._has_task(8))
+        # sync data before testing
+        self.db.sync_local_dbstore()
 
-    @classmethod
-    def tearDownClass(cls):
-        #cls._db = ListDB()
-        # do nothing for now
-        print
+        # retrieve remote data for testing
+        r        = requests.get(self.db.url_issues, params={'state': 'open'}, auth=self.db.auth)
+        db_local = shelve.open(os.path.abspath(self.db.DEFAULT_LOCAL_DBPATH), protocol=-1)
+
+        for issue in r.json():
+
+            task_no        = str(issue["number"])
+            task_summary   = issue["title"]
+            task_milestone = issue["milestone"]["title"] 
+            task_prio      = ""
+            task_type      = ""
+
+            for label in issue["labels"]:
+                if label["color"] == self.db.YELLOW: task_prio = label["name"]
+                if label["color"] == self.db.GREEN:  task_type = label["name"]
+
+            # after data syncing, the issue should be present in local store
+            self.assertTrue(db_local.has_key(task_no))
+
+            # the data stored at local should be the same as remote
+            self.assertTrue(db_local[task_no]["summary"]   == task_summary)
+            self.assertTrue(db_local[task_no]["type"]      == task_type)
+            self.assertTrue(db_local[task_no]["priority"]  == task_prio)
+            self.assertTrue(db_local[task_no]["milestone"] == task_milestone)
+
+        db_local.close()
+
+    def testRemoveTask(self):
+        self.assertTrue(True)
+
+    def testSyncRemoteDBStore(self):
+        self.assertTrue(os.path.exists(self.db.DEFAULT_LOCAL_DBPATH))
+        self.db.sync_remote_dbstore()
+        self.assertFalse(os.path.exists(self.db.DEFAULT_LOCAL_DBPATH))
+
+    def tearDown(self):
+        del self.db
 
 def main():
     unittest.main()
