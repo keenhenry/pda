@@ -221,8 +221,8 @@ import shelve
         #                                                        prio)
 
 DEFAULT_BASE_URL = "https://api.github.com/repos/"
-# REPO_NAME = 'keenhenry/todo'
-REPO_NAME = 'keenhenry/lists'
+REPO_NAME = 'keenhenry/todo'
+# REPO_NAME = 'keenhenry/lists'
 
 class ListDB(object):
     """Base class for representing list database.
@@ -249,19 +249,41 @@ class ListDB(object):
         self.__url_issues = DEFAULT_BASE_URL + REPO_NAME + "/issues"
         self.__auth       = (os.environ['PDA_AUTH'], '')
 
-    def _has_task(self, task_number):
+    @property
+    def url_issues(self):
+        return self.__url_issues
+
+    @property
+    def auth(self):
+        return self.__auth
+
+    def _has_task(self, db_local, task_number):
         """
+        :param db_local: :class:`shelve.Shelf`
         :param task_number: integer
         :rtype: True or False
         """
 
+        assert db_local is not None and isinstance(db_local, shelve.Shelf), db_local
         assert isinstance(task_number, (int, long)), task_number
 
-        db_local = shelve.open(os.path.abspath(self.DEFAULT_LOCAL_DBPATH), protocol=-1)
-        hasTask  = db_local.has_key(str(task_number))
-        db_local.close()
+        return db_local.has_key(str(task_number))
 
-        return hasTask
+    def _get_task_prio_and_type(self, task):
+        """
+        :param task: dict
+        :rtype: tuple
+        """
+
+        assert task is not None and isinstance(task, dict), task
+
+        prio, task_type = None, None
+
+        for label in task["labels"]:
+            if label["color"] == self.YELLOW:     prio = label["name"]
+            if label["color"] == self.GREEN: task_type = label["name"]
+        
+        return prio, task_type
 
     def sync_local_dbstore(self):
 
@@ -274,9 +296,7 @@ class ListDB(object):
         # write issue data into local db store
         for issue in r.json():
 
-            for label in issue["labels"]:
-                prio  = label["name"] if label["color"] == self.YELLOW else None
-                ltype = label["name"] if label["color"] == self.GREEN  else None
+            prio, ltype = self._get_task_prio_and_type(issue)
 
             issue_data = {
                           "summary"  : issue["title"],
@@ -287,14 +307,38 @@ class ListDB(object):
 
             db_local[str(issue["number"])] = issue_data
 
+        # create a list to hold command history records
+        db_local['CMDS_HISTORY'] = []
+
         # close local store
         db_local.close()
 
     def sync_remote_dbstore(self):
-        print
 
+        # TODO: syncing data to remote (Github Issues)
+
+        # remove local data store after syncing data to remote
+        os.remove(self.DEFAULT_LOCAL_DBPATH)
+        
     def remove_task(self, task_number):
-        print
+        """
+        :param task_number: integer
+        """
+        # prepare a local db store for storing issues locally
+        db_local = shelve.open(os.path.abspath(self.DEFAULT_LOCAL_DBPATH), 
+                               protocol=-1, 
+                               writeback=True)
+
+        if self._has_task(db_local, task_number):
+
+            # delete task at local store
+            del db_local[str(task_number)]
+
+            # record remove operation in list 'CMDS_HISTORY' in local store
+            cmd_history_data = { 'CMD': 'REMOVE', '#': task_number }
+            db_local['CMDS_HISTORY'].append(cmd_history_data)
+
+        db_local.close()
 
     def add_task(self):
         print
@@ -303,4 +347,41 @@ class ListDB(object):
         print
 
     def read_tasks(self):
-        print
+
+        db_local = shelve.open(os.path.abspath(self.DEFAULT_LOCAL_DBPATH), protocol=-1)
+
+        # print
+        # table_titles = ['TASK#', 'SUMMARY', 'LIST TYPE', 'DUE TIME', 'PRIORITY']
+        # print '{:<5}  {:<60}  {:<9}  {:<8}  {:<8}'.format(*table_titles)
+        # print '{:=<5}  {:=<60}  {:=<9}  {:=<8}  {:=<8}'.format(*['','','','',''])
+        # for key in db_local:
+        #     if key != 'CMDS_HISTORY':
+        #         print u'{:<5}  {:<60}  {:<9}  {:<8}  {:<8}'.format(key, 
+        #                                                            db_local[key]["summary"], 
+        #                                                            db_local[key]["type"], 
+        #                                                            db_local[key]["milestone"], 
+        #                                                            db_local[key]["priority"])
+
+        # for cmd in db_local['CMDS_HISTORY']:
+        #     print cmd
+
+        db_local.close()
+
+def main():
+
+    # create db object
+    db = ListDB()
+
+    db.sync_local_dbstore()
+
+    # db.read_tasks()
+    # db.remove_task(37)
+    # db.read_tasks()
+    # db.remove_task(37)
+    # db.remove_task(39)
+    # db.read_tasks()
+    
+    db.sync_remote_dbstore()
+
+if __name__ == '__main__':
+    main()
