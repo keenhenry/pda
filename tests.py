@@ -13,13 +13,23 @@ except ImportError:
 
 class ListDBTests(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        cls.db = ListDB()
+
+    @classmethod
+    def tearDownClass(cls):
+        del cls.db
+
     def setUp(self):
-        self.db = ListDB()
+        self.db.sync_local_dbstore()
+        # pass
+
+    def tearDown(self):
+        self.db.sync_remote_dbstore()
+        # pass
 
     def testSyncLocalDBStore(self):
-
-        # sync data before testing
-        self.db.sync_local_dbstore()
 
         # retrieve remote data for testing
         r        = requests.get(self.db.url_issues, params={'state': 'open'}, auth=self.db.auth)
@@ -49,15 +59,29 @@ class ListDBTests(unittest.TestCase):
         db_local.close()
 
     def testRemoveTask(self):
-        self.assertTrue(True)
+
+        # first try to collect a list of task numbers you want to remove
+        removed_tasks = []
+        to_be_removed = True
+        db_local = shelve.open(os.path.abspath(self.db.DEFAULT_LOCAL_DBPATH), protocol=-1)
+        for task_no in db_local:
+            if task_no != 'CMDS_HISTORY' and to_be_removed:
+                removed_tasks.append(task_no)
+                to_be_removed = (not to_be_removed)
+        db_local.close()
+
+        # second try to remove the tasks which are to be removed
+        for task_no in removed_tasks:
+            self.db.remove_task(int(task_no))
+
+        # check if those removed tasks are really removed
+        db_local = shelve.open(os.path.abspath(self.db.DEFAULT_LOCAL_DBPATH), protocol=-1)
+        for task_no in removed_tasks:
+            self.assertFalse(db_local.has_key(task_no))
+        db_local.close()
 
     def testSyncRemoteDBStore(self):
-        self.assertTrue(os.path.exists(self.db.DEFAULT_LOCAL_DBPATH))
-        self.db.sync_remote_dbstore()
-        self.assertFalse(os.path.exists(self.db.DEFAULT_LOCAL_DBPATH))
-
-    def tearDown(self):
-        del self.db
+        self.assertTrue(True)
 
 def main():
     unittest.main()
