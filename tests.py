@@ -23,11 +23,9 @@ class ListDBTests(unittest.TestCase):
 
     def setUp(self):
         self.db.sync_local_dbstore()
-        # pass
 
     def tearDown(self):
         self.db.sync_remote_dbstore()
-        # pass
 
     def testSyncLocalDBStore(self):
 
@@ -79,6 +77,21 @@ class ListDBTests(unittest.TestCase):
         for task_no in removed_tasks:
             self.assertFalse(db_local.has_key(task_no))
         db_local.close()
+
+        # remove non-existing task
+        num_of_records_before_remove, num_of_records_after_remove = 0, 0
+        db_local = shelve.open(os.path.abspath(self.db.DEFAULT_LOCAL_DBPATH), protocol=-1)
+        for task in db_local:
+            num_of_records_before_remove += 1
+        db_local.close()
+
+        self.db.remove_task(-1)
+
+        db_local = shelve.open(os.path.abspath(self.db.DEFAULT_LOCAL_DBPATH), protocol=-1)
+        for task in db_local:
+            num_of_records_after_remove += 1
+        db_local.close()
+        self.assertTrue(num_of_records_after_remove == num_of_records_before_remove)
 
     def testSyncRemoteDBStore(self):
         self.assertTrue(True)
