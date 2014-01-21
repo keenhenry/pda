@@ -93,6 +93,41 @@ class ListDBTests(unittest.TestCase):
         db_local.close()
         self.assertTrue(num_of_records_after_remove == num_of_records_before_remove)
 
+    def testAddTask(self):
+
+        # get number of tasks before adding tasks
+        num_of_tasks_before_add = 0
+        db_local = shelve.open(os.path.abspath(self.db.DEFAULT_LOCAL_DBPATH), protocol=-1)
+        for task in db_local:
+            num_of_tasks_before_add += 1
+        db_local.close()
+
+        # add one task
+        task_no = self.db.add_task('test summary 1', 'todo', 'week', 'must')
+
+        # get number of tasks after adding tasks
+        num_of_tasks_after_add = 0
+        db_local = shelve.open(os.path.abspath(self.db.DEFAULT_LOCAL_DBPATH), protocol=-1)
+        self.assertTrue(db_local.has_key(str(task_no)))
+        for task in db_local:
+            num_of_tasks_after_add += 1
+        db_local.close()
+
+        # num_of_tasks_before_add + 1 == num_of_tasks_after_add
+        self.assertTrue(num_of_tasks_after_add == (num_of_tasks_before_add+1))
+
+        # check data integrity
+        db_local = shelve.open(os.path.abspath(self.db.DEFAULT_LOCAL_DBPATH), protocol=-1)
+        self.assertTrue(db_local[str(task_no)]['summary'] == 'test summary 1')
+        self.assertTrue(db_local[str(task_no)]['type'] == 'todo')
+        self.assertTrue(db_local[str(task_no)]['milestone'] == 'week')
+        self.assertTrue(db_local[str(task_no)]['priority'] == 'must')
+        self.assertTrue(db_local['CMDS_HISTORY'][-1]['CMD'] == 'ADD')
+        db_local.close()
+
+    def testEditTask(self):
+        self.assertTrue(True)
+
     def testSyncRemoteDBStore(self):
         self.assertTrue(True)
 
