@@ -105,6 +105,10 @@ class ListDB(object):
     def auth(self):
         return self.__auth
 
+    @property
+    def max_task_number(self):
+        return self.__max_taskno
+
     def _has_task(self, db_local, task_number):
         """
         :param db_local: :class:`shelve.Shelf`
@@ -174,7 +178,7 @@ class ListDB(object):
     def sync_local_dbstore(self):
 
         # retrieving OPEN issues from Github Issues
-        r = requests.get(self.__url_issues, params={'state': 'open'}, auth=self.__auth)
+        r = requests.get(self.url_issues, params={'state': 'open'}, auth=self.auth)
 
         # prepare a local db store for storing issues locally
         db_local = shelve.open(os.path.abspath(self.DEFAULT_LOCAL_DBPATH), protocol=-1)
@@ -261,6 +265,8 @@ class ListDB(object):
         db_local['CMDS_HISTORY'].append(cmd_history_data)
 
         db_local.close()
+
+        return self.max_task_number
 
     def edit_task(self, task_number, 
                   new_summary  =None, 
