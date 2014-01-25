@@ -96,6 +96,16 @@ class ListDB(object):
         self.__url_issues = DEFAULT_BASE_URL + REPO_NAME + "/issues"
         self.__auth       = (os.environ['PDA_AUTH'], '')
         self.__max_taskno = -1
+        self.__shelf      = shelve.open(os.path.abspath(self.DEFAULT_LOCAL_DBPATH), 
+                                        protocol=-1,
+                                        writeback=True)
+
+    def __del__(self):
+        self.__shelf.close()
+
+    @property
+    def shelf(self):
+        return self.__shelf
 
     @property
     def url_issues(self):
@@ -109,17 +119,15 @@ class ListDB(object):
     def max_task_number(self):
         return self.__max_taskno
 
-    def _has_task(self, db_local, task_number):
+    def _has_task(self, task_number):
         """
-        :param db_local: :class:`shelve.Shelf`
         :param task_number: integer
         :rtype: True or False
         """
 
-        assert db_local is not None and isinstance(db_local, shelve.Shelf), db_local
         assert isinstance(task_number, (int, long)), task_number
 
-        return db_local.has_key(str(task_number))
+        return self.shelf.has_key(str(task_number))
 
     def _get_task_prio_and_type(self, task):
         """
@@ -153,35 +161,29 @@ class ListDB(object):
         print '{:<5}  {:<60}  {:<9}  {:<8}  {:<8}'.format(*headers)
         print '{:=<5}  {:=<60}  {:=<9}  {:=<8}  {:=<8}'.format(*['','','','',''])
 
-    def _print_task(self, db_local, task_number, task_type, milestone, priority):
+    def _print_task(self, task_number, task_type, milestone, priority):
         """Helper function for read_tasks()
-        :param db_local: :class:`shelve.Shelf`
         :param task_number: string
         :param task_type: None or string
         :param milestone: None or string
         :param priority : None or string
         """
 
-        assert db_local is not None and isinstance(db_local, shelve.Shelf), db_local
-
-        if self._is_selected(db_local[task_number]['type'], task_type,
-                             db_local[task_number]['milestone'], milestone,
-                             db_local[task_number]['priority'], priority):
+        if self._is_selected(self.shelf[task_number]['type'], task_type,
+                             self.shelf[task_number]['milestone'], milestone,
+                             self.shelf[task_number]['priority'], priority):
             print u'{:<5}  {:<60}  {:<9}  {:<8}  {:<8}'.format(
                                                          task_number, 
-                                                         db_local[task_number]["summary"], 
-                                                         db_local[task_number]["type"], 
-                                                         db_local[task_number]["milestone"], 
-                                                         db_local[task_number]["priority"])
+                                                         self.shelf[task_number]["summary"], 
+                                                         self.shelf[task_number]["type"], 
+                                                         self.shelf[task_number]["milestone"], 
+                                                         self.shelf[task_number]["priority"])
 
 
     def sync_local_dbstore(self):
 
         # retrieving OPEN issues from Github Issues
         r = requests.get(self.url_issues, params={'state': 'open'}, auth=self.auth)
-
-        # prepare a local db store for storing issues locally
-        db_local = shelve.open(os.path.abspath(self.DEFAULT_LOCAL_DBPATH), protocol=-1)
 
         # write issue data into local db store
         for issue in r.json():
@@ -195,22 +197,23 @@ class ListDB(object):
                           "priority" : prio
                          }
 
-            db_local[str(issue["number"])] = issue_data
+            self.shelf[str(issue["number"])] = issue_data
             self.__max_taskno = issue["number"] if issue["number"] > self.__max_taskno \
                                                 else self.__max_taskno
 
         # create a list to hold command history records
-        db_local['CMDS_HISTORY'] = []
+        self.shelf['CMDS_HISTORY'] = []
 
-        # close local store
-        db_local.close()
+        # sync to local store
+        self.shelf.sync()
 
     def sync_remote_dbstore(self):
 
         # TODO: syncing data to remote (Github Issues)
 
         # remove local data store after syncing data to remote
-        os.remove(self.DEFAULT_LOCAL_DBPATH)
+        # os.remove(self.DEFAULT_LOCAL_DBPATH)
+        pass
         
     def remove_task(self, task_number):
         """
@@ -219,21 +222,16 @@ class ListDB(object):
 
         assert isinstance(task_number, (int, long)), task_number
 
-        # prepare a local db store for storing issues locally
-        db_local = shelve.open(os.path.abspath(self.DEFAULT_LOCAL_DBPATH), 
-                               protocol=-1, 
-                               writeback=True)
-
-        if self._has_task(db_local, task_number):
+        if self._has_task(task_number):
 
             # delete task at local store
-            del db_local[str(task_number)]
+            del self.shelf[str(task_number)]
 
             # record remove operation in list 'CMDS_HISTORY' in local store
             cmd_history_data = { 'CMD': 'REMOVE', '#': task_number }
-            db_local['CMDS_HISTORY'].append(cmd_history_data)
+            self.shelf['CMDS_HISTORY'].append(cmd_history_data)
 
-        db_local.close()
+        self.shelf.sync()
 
     def add_task(self, summary, task_type=None, milestone=None, priority=None):
         assert summary   is not None and isinstance(summary,   str), summary
@@ -248,13 +246,9 @@ class ListDB(object):
                       "priority" : priority
                      }
 
-        db_local = shelve.open(os.path.abspath(self.DEFAULT_LOCAL_DBPATH), 
-                               protocol=-1,
-                               writeback=True)
-
         # the value of the key for local store is not important, as long as it is unique
         self.__max_taskno += 1
-        db_local[str(self.__max_taskno)] = issue_data
+        self.shelf[str(self.__max_taskno)] = issue_data
 
         # record ADD operation in list 'CMDS_HISTORY' in local store
         cmd_history_data = { 'CMD'      : 'ADD', 
@@ -262,9 +256,9 @@ class ListDB(object):
                              'TYPE'     : task_type,
                              'MILESTONE': milestone,
                              'PRIORITY' : priority }
-        db_local['CMDS_HISTORY'].append(cmd_history_data)
+        self.shelf['CMDS_HISTORY'].append(cmd_history_data)
 
-        db_local.close()
+        self.shelf.sync()
 
         return self.max_task_number
 
@@ -287,19 +281,15 @@ class ListDB(object):
         assert new_milestone is None or isinstance(new_milestone, str), new_milestone
         assert new_priority  is None or isinstance(new_priority,  str), new_priority
 
-        db_local = shelve.open(os.path.abspath(self.DEFAULT_LOCAL_DBPATH), 
-                               protocol=-1,
-                               writeback=True)
-
-        if self._has_task(db_local, task_number):
+        if self._has_task(task_number):
             if new_summary: 
-                db_local[str(task_number)]["summary"] = new_summary
+                self.shelf[str(task_number)]["summary"] = new_summary
             if new_tasktype: 
-                db_local[str(task_number)]["type"] = new_tasktype
+                self.shelf[str(task_number)]["type"] = new_tasktype
             if new_milestone: 
-                db_local[str(task_number)]["milestone"] = new_milestone
+                self.shelf[str(task_number)]["milestone"] = new_milestone
             if new_priority: 
-                db_local[str(task_number)]["priority"] = new_priority
+                self.shelf[str(task_number)]["priority"] = new_priority
 
             # record EDIT operation in list 'CMDS_HISTORY' in local store
             cmd_history_data = { 'CMD'      : 'EDIT', 
@@ -308,9 +298,9 @@ class ListDB(object):
                                  'TYPE'     : new_tasktype,
                                  'MILESTONE': new_milestone,
                                  'PRIORITY' : new_priority }
-            db_local['CMDS_HISTORY'].append(cmd_history_data)
+            self.shelf['CMDS_HISTORY'].append(cmd_history_data)
 
-        db_local.close()
+        self.shelf.sync()
 
     def read_tasks(self, task_type=None, milestone=None, priority=None):
         """
@@ -323,17 +313,14 @@ class ListDB(object):
         assert milestone is None or isinstance(milestone, str), milestone
         assert priority  is None or isinstance(priority,  str), priority
 
-        db_local = shelve.open(os.path.abspath(self.DEFAULT_LOCAL_DBPATH), protocol=-1)
-
         self._print_header()
-        for key in db_local:
+        for key in self.shelf:
             if key != 'CMDS_HISTORY':
-                self._print_task(db_local, key, task_type, milestone, priority)
+                self._print_task(key, task_type, milestone, priority)
 
-        for cmd in db_local['CMDS_HISTORY']:
+        # DEBUG code
+        for cmd in self.shelf['CMDS_HISTORY']:
             print cmd
-
-        db_local.close()
 
 def main():
 
@@ -347,7 +334,9 @@ def main():
     db.read_tasks()
     db.edit_task(task_number=44, new_tasktype='toread', new_milestone='year')
     db.read_tasks()
-    # db.read_tasks('todo', 'day', 'high')
+    db.remove_task(41)
+    db.read_tasks()
+    db.read_tasks('toread')
     # db.read_tasks('todo', 'day', 'low')
     
     db.sync_remote_dbstore()
