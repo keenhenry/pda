@@ -9,63 +9,6 @@ import requests
 import os
 import shelve
 
-# def collect_one_label(db, list_of_labels, label_name, label_color):
-#     """
-#     :param db: :class:`github.Repository.Repository`
-#     :param list_of_labels: list of :class:`github.Label.Label`s
-#     :param label_name: string
-#     :param label_color: string
-#     """
-#     list_of_labels.append(get_one_label(db, label_name, label_color))
-# 
-# def get_one_milestone(db, milestone_title):
-#     """
-#     :param db: :class:`github.Repository.Repository`
-#     :param milestone_title: string
-#     :rtype: :class:`github.Milestone.Milestone`
-#     """
-#     milestone_number = get_milestone_number(db, milestone_title)
-#     if milestone_number:
-#         return db.get_milestone(milestone_number)
-#     else:
-#         return db.create_milestone(milestone_title)
-# 
-# def create_listname(args, db, list_of_labels):
-#     """
-#     :param args: :class:`argparse.Namespace`
-#     :param db: :class:`github.Repository.Repository`
-#     :param list_of_labels: list of :class:`github.Label.Label`s
-#     """
-#     if args.listname:
-#         collect_one_label(db, list_of_labels, args.listname, GREEN)
-# 
-# def update_milestone(db, issue, time):
-#     """
-#     :param db: :class:`github.Repository.Repository`
-#     :param issue: :class:`github.Issue.Issue`
-#     :param time: string
-#     """
-#     title = convert_milestone_title(time)
-# 
-#     if issue.milestone and issue.milestone.title != title:
-#         issue.edit(milestone=get_one_milestone(db, title))
-# 
-# def update_one_label(db, issue, label_name, label_color):
-#     """
-#     :param db: :class:`github.Repository.Repository`
-#     :param issue: :class:`github.Issue.Issue`
-#     :param label_name: string
-#     :param label_color: string
-#     """
-#     # remove original priority from task
-#     for label in issue.get_labels():
-#         if label.color == label_color and label.name != label_name:
-#             issue.remove_from_labels(label)
-#             break
-# 
-#     # add new priority to task
-#     issue.add_to_labels(get_one_label(db, label_name, label_color))
-# 
 
 DEFAULT_BASE_URL = "https://api.github.com/repos/"
 REPO_NAME = 'keenhenry/todo'
@@ -118,6 +61,10 @@ class ListDB(object):
     @property
     def max_task_number(self):
         return self.__max_taskno
+
+    @max_task_number.setter
+    def max_task_number(self, value):
+        self.__max_taskno = value
 
     def _has_task(self, task_number):
         """
@@ -198,8 +145,8 @@ class ListDB(object):
                          }
 
             self.shelf[str(issue["number"])] = issue_data
-            self.__max_taskno = issue["number"] if issue["number"] > self.__max_taskno \
-                                                else self.__max_taskno
+            self.max_task_number = issue["number"] if issue["number"] > self.max_task_number \
+                                                else self.max_task_number
 
         # create a list to hold command history records
         self.shelf['CMDS_HISTORY'] = []
@@ -212,8 +159,7 @@ class ListDB(object):
         # TODO: syncing data to remote (Github Issues)
 
         # remove local data store after syncing data to remote
-        # os.remove(self.DEFAULT_LOCAL_DBPATH)
-        pass
+        os.remove(self.DEFAULT_LOCAL_DBPATH)
         
     def remove_task(self, task_number):
         """
@@ -230,8 +176,7 @@ class ListDB(object):
             # record remove operation in list 'CMDS_HISTORY' in local store
             cmd_history_data = { 'CMD': 'REMOVE', '#': task_number }
             self.shelf['CMDS_HISTORY'].append(cmd_history_data)
-
-        self.shelf.sync()
+            self.shelf.sync()
 
     def add_task(self, summary, task_type=None, milestone=None, priority=None):
         assert summary   is not None and isinstance(summary,   str), summary
@@ -247,7 +192,7 @@ class ListDB(object):
                      }
 
         # the value of the key for local store is not important, as long as it is unique
-        self.__max_taskno += 1
+        self.max_task_number += 1
         self.shelf[str(self.__max_taskno)] = issue_data
 
         # record ADD operation in list 'CMDS_HISTORY' in local store
@@ -299,8 +244,7 @@ class ListDB(object):
                                  'MILESTONE': new_milestone,
                                  'PRIORITY' : new_priority }
             self.shelf['CMDS_HISTORY'].append(cmd_history_data)
-
-        self.shelf.sync()
+            self.shelf.sync()
 
     def read_tasks(self, task_type=None, milestone=None, priority=None):
         """
