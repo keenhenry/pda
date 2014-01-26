@@ -100,6 +100,21 @@ class ListDB(object):
                (milestone_requested is None or milestone_requested == milestone_in_db) and \
                (priority_requested is None or priority_requested == priority_in_db)
 
+    def _is_cmd_history_annihilable(self, task_number):
+        """
+        :param task_number: integer
+        :rtype: True or False
+        """
+
+        o_cmd_list = self.shelf['CMDS_HISTORY']
+        n_cmd_list = [cmd for cmd in o_cmd_list if \
+                          not (cmd['#'] == task_number and cmd['CMD'] != 'REMOVE')]
+
+        self.shelf['CMDS_HISTORY'] = n_cmd_list
+
+        return (len(n_cmd_list) < len(o_cmd_list))
+
+
     def _print_header(self):
 
         headers = ['TASK#', 'SUMMARY', 'LIST TYPE', 'DUE TIME', 'PRIORITY']
@@ -157,6 +172,15 @@ class ListDB(object):
     def sync_remote_dbstore(self):
 
         # TODO: syncing data to remote (Github Issues)
+        # for cmd in self.shelf['CMDS_HISTORY']:
+        #     if cmd['CMD'] == 'REMOVE':
+        #         print
+        #     elif cmd['CMD'] == 'ADD':
+        #         print
+        #     elif cmd['CMD'] == 'EDIT':
+        #         print
+        #     else: # should never reach here!
+        #         print 'Something must be wrong!'
 
         # remove local data store after syncing data to remote
         os.remove(self.DEFAULT_LOCAL_DBPATH)
@@ -174,8 +198,10 @@ class ListDB(object):
             del self.shelf[str(task_number)]
 
             # record remove operation in list 'CMDS_HISTORY' in local store
-            cmd_history_data = { 'CMD': 'REMOVE', '#': task_number }
-            self.shelf['CMDS_HISTORY'].append(cmd_history_data)
+            if not self._is_cmd_history_annihilable(task_number):
+                cmd_history_data = { 'CMD': 'REMOVE', '#': task_number }
+                self.shelf['CMDS_HISTORY'].append(cmd_history_data)
+
             self.shelf.sync()
 
     def add_task(self, summary, task_type=None, milestone=None, priority=None):
@@ -193,10 +219,11 @@ class ListDB(object):
 
         # the value of the key for local store is not important, as long as it is unique
         self.max_task_number += 1
-        self.shelf[str(self.__max_taskno)] = issue_data
+        self.shelf[str(self.max_task_number)] = issue_data
 
         # record ADD operation in list 'CMDS_HISTORY' in local store
-        cmd_history_data = { 'CMD'      : 'ADD', 
+        cmd_history_data = { '#'        : self.max_task_number,
+                             'CMD'      : 'ADD', 
                              'SUMMARY'  : summary,
                              'TYPE'     : task_type,
                              'MILESTONE': milestone,
@@ -279,9 +306,9 @@ def main():
     db.edit_task(task_number=44, new_tasktype='toread', new_milestone='year')
     db.read_tasks()
     db.remove_task(41)
+    # db.remove_task(44)
     db.read_tasks()
-    db.read_tasks('toread')
-    # db.read_tasks('todo', 'day', 'low')
+    # db.read_tasks('toread')
     
     db.sync_remote_dbstore()
 
