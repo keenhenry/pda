@@ -20,7 +20,9 @@ class ListDBTests(unittest.TestCase):
 
     def tearDown(self):
         del self.db
-        os.remove(self.shelf_path)
+
+        if os.path.exists(self.shelf_path):
+            os.remove(self.shelf_path)
 
     def testSyncLocalDBStore(self):
 
@@ -112,10 +114,53 @@ class ListDBTests(unittest.TestCase):
         self.assertTrue(self.db.shelf[first_task_no]['type']      == 'tolearn')
         self.assertTrue(self.db.shelf[first_task_no]['milestone'] == 'year')
         self.assertTrue(self.db.shelf[first_task_no]['priority']  == old_prio)
-        self.assertTrue(self.db.shelf['CMDS_HISTORY'][-1]['CMD']  == 'EDIT')
 
     def testSyncRemoteDBStore(self):
-        self.assertTrue(True)
+
+        if self.db.shelf:
+
+            task_numbers = [number for number in self.db.shelf.keys() \
+                                              if number != 'CMDS_HISTORY']
+
+            # (1) remove tasks
+            if task_numbers:
+                number = task_numbers.pop()
+                self.db.remove_task(int(number))
+
+            if task_numbers:
+                number = task_numbers.pop()
+                self.db.remove_task(int(number))
+
+            # (2) add a task
+            added_1st = self.db.add_task('first added', 'tolearn', 'month', 'low')
+
+            # (3) add a task
+            added_2nd = self.db.add_task('secondly added', 'todo', 'year', 'high')
+
+            # (4) edit a locally added task
+            self.db.edit_task(int(added_2nd), new_milestone='season', new_tasktype='toread')
+
+            # (5) edit a remotely imported task
+            if task_numbers:
+                number = task_numbers.pop()
+                self.db.edit_task(int(number), new_priority='urgmust')
+
+        # a data structure in memory to hold all the records before data is synced to remote
+        records = [self.db.shelf[k] for k in self.db.shelf if k != 'CMDS_HISTORY']
+
+        # syncing data to remote
+        self.db.sync_remote_dbstore()
+
+        # retrieving remote data to local memory
+        r = requests.get(self.db.url_issues, params={'state': 'open'}, auth=self.db.auth)
+
+        if r.status_code == requests.codes.ok:
+            remote_records = r.json()
+
+        # check number of records are equal
+        self.assertTrue(len(records)==len(remote_records))
+
+        # TODO: check data is equivalent
 
 def main():
     unittest.main()
