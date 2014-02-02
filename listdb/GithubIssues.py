@@ -8,6 +8,8 @@
 import requests
 import os
 import shelve
+import json
+import sys
 
 
 DEFAULT_BASE_URL = "https://api.github.com/repos/"
@@ -36,12 +38,14 @@ class ListDB(object):
 
     def __init__(self):
 
-        self.__url_issues = DEFAULT_BASE_URL + REPO_NAME + "/issues"
-        self.__auth       = (os.environ['PDA_AUTH'], '')
-        self.__max_taskno = -1
-        self.__shelf      = shelve.open(os.path.abspath(self.DEFAULT_LOCAL_DBPATH), 
-                                        protocol=-1,
-                                        writeback=True)
+        self.__url_issues     = DEFAULT_BASE_URL + REPO_NAME + "/issues"
+        self.__url_milestones = DEFAULT_BASE_URL + REPO_NAME + "/milestones"
+        self.__url_labels     = DEFAULT_BASE_URL + REPO_NAME + "/labels"
+        self.__auth           = (os.environ['PDA_AUTH'], '')
+        self.__max_taskno     = -1
+        self.__shelf          = shelve.open(os.path.abspath(self.DEFAULT_LOCAL_DBPATH), 
+                                            protocol=-1,
+                                            writeback=True)
 
     def __del__(self):
         self.__shelf.close()
@@ -53,6 +57,14 @@ class ListDB(object):
     @property
     def url_issues(self):
         return self.__url_issues
+
+    @property
+    def url_milestones(self):
+        return self.__url_milestones
+
+    @property
+    def url_labels(self):
+        return self.__url_labels
 
     @property
     def auth(self):
@@ -114,6 +126,205 @@ class ListDB(object):
 
         return (len(n_cmd_list) < len(o_cmd_list))
 
+    def _is_locally_created_issue_updated(self, task_number, 
+                                                new_summary, 
+                                                new_tasktype, 
+                                                new_milestone,
+                                                new_priority):
+        """
+        :param task_number: integer
+        :param new_summary  : None or string
+        :param new_tasktype : None or string
+        :param new_milestone: None or string
+        :param new_priority : None or string
+        :rtype: True or False
+        """
+
+        o_cmd_list, n_cmd_list = self.shelf['CMDS_HISTORY'], []
+        is_local_created_issue_updated = False
+
+        for cmd in o_cmd_list:
+            if cmd['#'] == task_number and cmd['CMD'] == 'ADD':
+                if new_summary: cmd['SUMMARY'] = new_summary
+                if new_tasktype: cmd['TYPE'] = new_tasktype
+                if new_priority: cmd['PRIORITY'] = new_priority
+                if new_milestone: cmd['MILESTONE'] = new_milestone
+                is_local_created_issue_updated = True
+            n_cmd_list.append(cmd)
+
+        self.shelf['CMDS_HISTORY'] = n_cmd_list
+
+        return is_local_created_issue_updated
+
+    def _get_one_label(self, name, color, labels):
+        """
+        :param name: string
+        :param color: string
+        :param labels: list of strings 
+        """
+
+        r = requests.get(self.url_labels+'/'+name, auth=self.auth)
+
+        if r.status_code == requests.codes.ok: # label found
+            labels.append(name)
+        else: # label not found, create a new label in Github Issues
+            rep = requests.put(self.url_labels, 
+                               data=json.dumps({'name': name, 'color': color}), 
+                               auth=self.auth)
+
+            if rep.status_code == requests.codes.created:
+                labels.append(name)
+            else:
+                self.die_msg('label created failed: '+ name)
+
+    def _update_labels(self, cmd):
+        """
+        :param cmd: dict
+        :rtype: list of strings
+        """
+
+        labels, issue_number, issue_type, issue_prio = [], cmd['#'], cmd['TYPE'], cmd['PRIORITY']
+
+        r = requests.get(self.url_issues+'/'+str(issue_number)+'/labels', auth=self.auth)
+
+        if r.status_code == requests.codes.ok:
+            # replacing labels
+            for label in r.json():
+                if label['color'] == self.GREEN:
+                    if issue_type and issue_type != label['name']: 
+                        labels.append(issue_type)
+                    else:
+                        labels.append(label['name'])
+                elif label['color'] == self.YELLOW:
+                    if issue_prio and issue_prio != label['name']: 
+                        labels.append(issue_prio)
+                    else:
+                        labels.append(label['name'])
+                else: # for other colors, still keep original labels
+                    labels.append(label['name'])
+
+            # adding labels if not already present in labels after replacing
+            if issue_type and issue_type not in labels:
+                labels.append(issue_type)
+            if issue_prio and issue_prio not in labels:
+                labels.append(issue_prio)
+        else:
+            self.die_msg('failed to retrive labels for current issue: '+str(issue_number))
+
+        return labels
+
+    def _get_labels(self, cmd):
+        """
+        :param cmd: dict
+        :rtype: list of strings
+        """
+
+        labels = []
+
+        if cmd['TYPE']:
+            self._get_one_label(cmd['TYPE'], self.GREEN, labels)
+
+        if cmd['PRIORITY']:
+            self._get_one_label(cmd['PRIORITY'], self.YELLOW, labels)
+
+        return labels
+
+    def _get_milestone_number(self, cmd):
+        """
+        :param cmd: dict
+        :rtype: integer or None
+        """
+
+        milestone_number, milestone_title = None, cmd['MILESTONE']
+
+        # look for existing milestone
+        if milestone_title:
+            r = requests.get(self.url_milestones, auth=self.auth)
+
+            if r.status_code == requests.codes.ok:
+                for milestone in r.json():
+                    if milestone['title'] == milestone_title:
+                        milestone_number = milestone['number']
+                        break
+            else:
+                self.die_msg('retrieving milestone failed')
+
+        # milestone not created yet, create one
+        if milestone_title and not milestone_number:
+            r = requests.post(url=self.url_milestones,
+                              data=json.dumps({'title': milestone_title}),
+                              auth=self.auth)
+
+            if r.status_code == requests.codes.created:
+                milestone_number = r.json()['number']
+            else:
+                self.die_msg('create milestone failed')
+
+        return milestone_number
+
+    def _prepare_payload_for_add_or_edit(self, cmd, payload):
+        """
+        :param cmd: dict
+        :param payload: dict
+        """
+
+        assert payload is not None and isinstance(payload, dict), payload
+
+        milestone_number = self._get_milestone_number(cmd) 
+        labels           = self._get_labels(cmd) if cmd['CMD'] == 'ADD' \
+                                                 else self._update_labels(cmd)
+
+        if cmd['SUMMARY']: 
+            payload['title'] = cmd['SUMMARY']
+        if cmd['MILESTONE'] and milestone_number: 
+            payload['milestone'] = milestone_number
+        if labels: 
+            payload['labels'] = labels
+
+    def _prepare_method_url_and_payload(self, cmd):
+        """
+        :param cmd: dict
+        :rtype: tuple of (str, dict)
+        """
+
+        url, payload = self.url_issues, {}
+
+        if cmd['CMD'] == 'REMOVE':
+            url += '/'+str(cmd['#']) 
+            payload['state'] = 'closed'
+        elif cmd['CMD'] == 'ADD':
+            self._prepare_payload_for_add_or_edit(cmd, payload)
+        elif cmd['CMD'] == 'EDIT':
+            url += '/'+str(cmd['#']) 
+            self._prepare_payload_for_add_or_edit(cmd, payload)
+        else: # should never reach here!
+            self.die_msg('CMD type unknown in command history')
+
+        return url, payload
+
+    def _exec_cmd_on_remote(self, cmd):
+        """
+        :param cmd: dict
+        :rtype: True or False
+        """
+
+        assert cmd is not None and isinstance(cmd, dict), cmd
+
+        success = False
+
+        url, payload = self._prepare_method_url_and_payload(cmd)
+
+        if cmd['CMD'] == 'ADD':
+            r = requests.post(url=url, data=json.dumps(payload), auth=self.auth)
+            success = (r.status_code == requests.codes.created)
+        elif cmd['CMD'] == 'EDIT':
+            r = requests.patch(url=url, data=json.dumps(payload), auth=self.auth)
+            success = (r.status_code == requests.codes.ok)
+        else: # REMOVE
+            r = requests.patch(url=url, data=json.dumps(payload), auth=self.auth)
+            success = (r.status_code == requests.codes.ok)
+
+        return success
 
     def _print_header(self):
 
@@ -147,40 +358,38 @@ class ListDB(object):
         # retrieving OPEN issues from Github Issues
         r = requests.get(self.url_issues, params={'state': 'open'}, auth=self.auth)
 
-        # write issue data into local db store
-        for issue in r.json():
+        if r.status_code == requests.codes.ok:
+            # write issue data into local db store
+            for issue in r.json():
+                prio, ltype = self._get_task_prio_and_type(issue)
+                milestone   = issue["milestone"]["title"] if issue["milestone"] else None
 
-            prio, ltype = self._get_task_prio_and_type(issue)
+                issue_data = {
+                              "summary"  : issue["title"],
+                              "type"     : ltype,
+                              "milestone": milestone,
+                              "priority" : prio
+                             }
 
-            issue_data = {
-                          "summary"  : issue["title"],
-                          "type"     : ltype,
-                          "milestone": issue["milestone"]["title"],
-                          "priority" : prio
-                         }
+                self.shelf[str(issue["number"])] = issue_data
+                self.max_task_number = issue["number"] if issue["number"] > self.max_task_number \
+                                                    else self.max_task_number
 
-            self.shelf[str(issue["number"])] = issue_data
-            self.max_task_number = issue["number"] if issue["number"] > self.max_task_number \
-                                                else self.max_task_number
+            # create a list to hold command history records
+            self.shelf['CMDS_HISTORY'] = []
 
-        # create a list to hold command history records
-        self.shelf['CMDS_HISTORY'] = []
-
-        # sync to local store
-        self.shelf.sync()
+            # sync to local store
+            self.shelf.sync()
+        else:
+            die_msg('syncing to local store failed')
 
     def sync_remote_dbstore(self):
 
-        # TODO: syncing data to remote (Github Issues)
-        # for cmd in self.shelf['CMDS_HISTORY']:
-        #     if cmd['CMD'] == 'REMOVE':
-        #         print
-        #     elif cmd['CMD'] == 'ADD':
-        #         print
-        #     elif cmd['CMD'] == 'EDIT':
-        #         print
-        #     else: # should never reach here!
-        #         print 'Something must be wrong!'
+        # syncing data to remote (Github Issues)
+        for cmd in self.shelf['CMDS_HISTORY']:
+            ok = self._exec_cmd_on_remote(cmd)
+            if not ok:
+                self.die_msg('syncing remote failed'), repr(cmd)
 
         # remove local data store after syncing data to remote
         os.remove(self.DEFAULT_LOCAL_DBPATH)
@@ -264,13 +473,15 @@ class ListDB(object):
                 self.shelf[str(task_number)]["priority"] = new_priority
 
             # record EDIT operation in list 'CMDS_HISTORY' in local store
-            cmd_history_data = { 'CMD'      : 'EDIT', 
-                                 '#'        : task_number,
-                                 'SUMMARY'  : new_summary,
-                                 'TYPE'     : new_tasktype,
-                                 'MILESTONE': new_milestone,
-                                 'PRIORITY' : new_priority }
-            self.shelf['CMDS_HISTORY'].append(cmd_history_data)
+            if not self._is_locally_created_issue_updated(task_number, new_summary, new_tasktype,
+                    new_milestone, new_priority):
+                cmd_history_data = { 'CMD'      : 'EDIT', 
+                                     '#'        : task_number,
+                                     'SUMMARY'  : new_summary,
+                                     'TYPE'     : new_tasktype,
+                                     'MILESTONE': new_milestone,
+                                     'PRIORITY' : new_priority }
+                self.shelf['CMDS_HISTORY'].append(cmd_history_data)
             self.shelf.sync()
 
     def read_tasks(self, task_type=None, milestone=None, priority=None):
@@ -289,9 +500,16 @@ class ListDB(object):
             if key != 'CMDS_HISTORY':
                 self._print_task(key, task_type, milestone, priority)
 
-        # DEBUG code
-        for cmd in self.shelf['CMDS_HISTORY']:
-            print cmd
+        # DEBUG: check CMDS_HISTORY
+        # print 'History:', repr(self.shelf['CMDS_HISTORY'])
+
+    def die_msg(self, msg=''):
+        """
+        :param msg: string
+        """
+
+        print '{}: error: {}'.format('pda', msg)
+        sys.exit(1)
 
 def main():
 
@@ -299,17 +517,18 @@ def main():
     db = ListDB()
 
     db.sync_local_dbstore()
-
-    db.read_tasks()
-    db.add_task('task 6', 'tolearn', 'month', 'must')
-    db.read_tasks()
-    db.edit_task(task_number=44, new_tasktype='toread', new_milestone='year')
-    db.read_tasks()
-    db.remove_task(41)
+    # db.read_tasks()
+    # db.edit_task(task_number=50, new_tasktype='tolearn')
+    # db.read_tasks()
+    # number = db.add_task('2nd wrong formatted issue', task_type='todo')
+    # db.read_tasks()
+    # db.edit_task(task_number=number, new_milestone='week', new_priority='urgmust')
+    # db.read_tasks()
+    # db.remove_task(42)
     # db.remove_task(44)
+    # db.remove_task(46)
+    # db.remove_task(48)
     db.read_tasks()
-    # db.read_tasks('toread')
-    
     db.sync_remote_dbstore()
 
 if __name__ == '__main__':
