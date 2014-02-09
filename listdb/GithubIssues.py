@@ -42,7 +42,6 @@ class ListDB(object):
         self.__url_milestones = DEFAULT_BASE_URL + REPO_NAME + "/milestones"
         self.__url_labels     = DEFAULT_BASE_URL + REPO_NAME + "/labels"
         self.__auth           = (os.environ['PDA_AUTH'], '')
-        self.__max_taskno     = -1
         self.__shelf          = shelve.open(os.path.abspath(self.DEFAULT_LOCAL_DBPATH), 
                                             protocol=-1,
                                             writeback=True)
@@ -72,11 +71,7 @@ class ListDB(object):
 
     @property
     def max_task_number(self):
-        return self.__max_taskno
-
-    @max_task_number.setter
-    def max_task_number(self, value):
-        self.__max_taskno = value
+        return max(int(task_no) for task_no in self.shelf if task_no != 'CMDS_HISTORY')
 
     def _get_task_prio_and_type(self, task):
         """
@@ -404,8 +399,6 @@ class ListDB(object):
                              }
 
                 self.shelf[str(issue["number"])] = issue_data
-                self.max_task_number = issue["number"] if issue["number"] > self.max_task_number \
-                                                    else self.max_task_number
 
             # create a list to hold command history records
             self.shelf['CMDS_HISTORY'] = []
@@ -459,11 +452,11 @@ class ListDB(object):
                      }
 
         # the value of the key for local store is not important, as long as it is unique
-        self.max_task_number += 1
-        self.shelf[str(self.max_task_number)] = issue_data
+        max_task_number = self.max_task_number + 1
+        self.shelf[str(max_task_number)] = issue_data
 
         # record ADD operation in list 'CMDS_HISTORY' in local store
-        cmd_history_data = { '#'        : self.max_task_number,
+        cmd_history_data = { '#'        : max_task_number,
                              'CMD'      : 'ADD', 
                              'SUMMARY'  : summary,
                              'TYPE'     : task_type,
@@ -473,7 +466,7 @@ class ListDB(object):
 
         self.shelf.sync()
 
-        return self.max_task_number
+        return max_task_number
 
     def edit_task(self, task_number, 
                   new_summary  =None, 
