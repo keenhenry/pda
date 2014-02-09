@@ -38,9 +38,9 @@ class ListDB(object):
 
         assert repo_name is not None and isinstance(repo_name, str), repo_name
 
-        self.__url_issues     = DEFAULT_BASE_URL + repo_name + "/issues"
-        self.__url_milestones = DEFAULT_BASE_URL + repo_name + "/milestones"
-        self.__url_labels     = DEFAULT_BASE_URL + repo_name + "/labels"
+        self.__url_issues     = self.DEFAULT_BASE_URL + repo_name + "/issues"
+        self.__url_milestones = self.DEFAULT_BASE_URL + repo_name + "/milestones"
+        self.__url_labels     = self.DEFAULT_BASE_URL + repo_name + "/labels"
         self.__auth           = (os.environ['PDA_AUTH'], '')
         self.__shelf          = shelve.open(os.path.abspath(self.DEFAULT_LOCAL_DBPATH), 
                                             protocol=-1,
