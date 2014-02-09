@@ -73,22 +73,6 @@ class ListDB(object):
     def max_task_number(self):
         return max(int(task_no) for task_no in self.shelf if task_no != 'CMDS_HISTORY')
 
-    def _get_task_prio_and_type(self, task):
-        """
-        :param task: dict
-        :rtype: tuple
-        """
-
-        assert task is not None and isinstance(task, dict), task
-
-        prio, task_type = None, None
-
-        for label in task["labels"]:
-            if label["color"] == self.YELLOW:     prio = label["name"]
-            if label["color"] == self.GREEN: task_type = label["name"]
-        
-        return prio, task_type
-
     def _is_selected(self, task_type_in_db, task_type_requested, 
                            milestone_in_db, milestone_requested, 
                            priority_in_db, priority_requested):
@@ -380,6 +364,23 @@ class ListDB(object):
 
         return self.shelf.has_key(str(task_number))
 
+    def get_task_prio_and_type(self, task):
+        """
+        :param task: dict
+        :rtype: tuple
+        """
+
+        assert task is not None and isinstance(task, dict), task
+
+        prio, task_type = None, None
+
+        for label in task["labels"]:
+            if label["color"] == self.YELLOW:     prio = label["name"]
+            if label["color"] == self.GREEN: task_type = label["name"]
+        
+        return prio, task_type
+
+
     def sync_local_dbstore(self):
 
         # retrieving OPEN issues from Github Issues
@@ -388,7 +389,7 @@ class ListDB(object):
         if r.status_code == requests.codes.ok:
             # write issue data into local db store
             for issue in r.json():
-                prio, ltype = self._get_task_prio_and_type(issue)
+                prio, ltype = self.get_task_prio_and_type(issue)
                 milestone   = issue["milestone"]["title"] if issue["milestone"] else None
 
                 issue_data = {
