@@ -160,7 +160,7 @@ def controller(db):
                           ListDB.convert_int_prio_to_text_prio(args.priority))
 
 def main():
-    db = ListDB()
+    db = ListDB('keenhenry/lists')
     controller(db)
 
 if __name__ == '__main__':

@@ -11,14 +11,12 @@ import shelve
 import json
 import sys
 
-
-DEFAULT_BASE_URL = "https://api.github.com/repos/"
-REPO_NAME = 'keenhenry/todo'
-# REPO_NAME = 'keenhenry/lists'
-
 class ListDB(object):
     """Base class for representing list database.
     """
+
+    # base url to Github Issues API
+    DEFAULT_BASE_URL = "https://api.github.com/repos/"
 
     # COLOR constants
     GREEN  = '009800'
@@ -36,11 +34,13 @@ class ListDB(object):
     # default local database mirror path
     DEFAULT_LOCAL_DBPATH = '/tmp/.pdastore'
 
-    def __init__(self):
+    def __init__(self, repo_name):
 
-        self.__url_issues     = DEFAULT_BASE_URL + REPO_NAME + "/issues"
-        self.__url_milestones = DEFAULT_BASE_URL + REPO_NAME + "/milestones"
-        self.__url_labels     = DEFAULT_BASE_URL + REPO_NAME + "/labels"
+        assert repo_name is not None and isinstance(repo_name, str), repo_name
+
+        self.__url_issues     = DEFAULT_BASE_URL + repo_name + "/issues"
+        self.__url_milestones = DEFAULT_BASE_URL + repo_name + "/milestones"
+        self.__url_labels     = DEFAULT_BASE_URL + repo_name + "/labels"
         self.__auth           = (os.environ['PDA_AUTH'], '')
         self.__shelf          = shelve.open(os.path.abspath(self.DEFAULT_LOCAL_DBPATH), 
                                             protocol=-1,
