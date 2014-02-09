@@ -153,14 +153,23 @@ class ListDBTests(unittest.TestCase):
 
         # retrieving remote data to local memory
         r = requests.get(self.db.url_issues, params={'state': 'open'}, auth=self.db.auth)
-
         if r.status_code == requests.codes.ok:
             remote_records = r.json()
 
         # check number of records are equal
         self.assertTrue(len(records)==len(remote_records))
 
-        # TODO: check data is equivalent
+        # check if data is equivalent by making use of sets!
+        local, remote = set([]), set([])
+
+        for rec in records:
+            local.add((rec['summary'], rec['type'], rec['milestone'], rec['priority']))
+
+        for rec in remote_records:
+            prio, ltype = self.db.get_task_prio_and_type(rec)
+            remote.add((rec['title'], ltype, rec['milestone']['title'], prio))
+
+        self.assertTrue(local==remote)
 
 def main():
     unittest.main()
