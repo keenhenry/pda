@@ -78,16 +78,6 @@ class ListDB(object):
     def max_task_number(self, value):
         self.__max_taskno = value
 
-    def _has_task(self, task_number):
-        """
-        :param task_number: integer
-        :rtype: True or False
-        """
-
-        assert isinstance(task_number, (int, long)), task_number
-
-        return self.shelf.has_key(str(task_number))
-
     def _get_task_prio_and_type(self, task):
         """
         :param task: dict
@@ -352,6 +342,48 @@ class ListDB(object):
                                                          self.shelf[task_number]["milestone"], 
                                                          self.shelf[task_number]["priority"])
 
+    @staticmethod
+    def extend_milestone(milestone):
+        """
+        :param milestone: string
+        :rtype: string
+        """
+
+        assert milestone is None or isinstance(milestone, str), milestone
+
+        # dictionary-based 'switch' statement
+        # None is default if milestone is not found
+        return {'d': 'day',
+                'w': 'week',
+                'm': 'month',
+                's': 'season',
+                'y': 'year'}.get(milestone, None) if milestone else None
+
+    @classmethod
+    def convert_int_prio_to_text_prio(cls, priority):
+        """
+        :param priority: integer
+        :rtype: string
+        """
+        assert priority is None or isinstance(priority, int), priority
+
+        # dictionary-based 'switch' statement
+        # None is default if priority is not found
+        return {cls.URGENT_MUSTDO:     'urgmust',
+                cls.MUSTDO:            'must',
+                cls.HIGH_IMPORTANCE:   'high',
+                cls.MEDIUM_IMPORTANCE: 'medium',
+                cls.LOW_IMPORTANCE:    'low'}.get(priority, None) if priority else None
+
+    def has_task(self, task_number):
+        """
+        :param task_number: integer
+        :rtype: True or False
+        """
+
+        assert isinstance(task_number, (int, long)), task_number
+
+        return self.shelf.has_key(str(task_number))
 
     def sync_local_dbstore(self):
 
@@ -401,7 +433,7 @@ class ListDB(object):
 
         assert isinstance(task_number, (int, long)), task_number
 
-        if self._has_task(task_number):
+        if self.has_task(task_number):
 
             # delete task at local store
             del self.shelf[str(task_number)]
@@ -462,7 +494,7 @@ class ListDB(object):
         assert new_milestone is None or isinstance(new_milestone, str), new_milestone
         assert new_priority  is None or isinstance(new_priority,  str), new_priority
 
-        if self._has_task(task_number):
+        if self.has_task(task_number):
             if new_summary: 
                 self.shelf[str(task_number)]["summary"] = new_summary
             if new_tasktype: 
