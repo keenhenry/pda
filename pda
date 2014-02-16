@@ -122,10 +122,7 @@ def controller(db):
     #=============================================================#
     args = p.parse_args()
 
-    #======================#
-    # Create ListDB object #
-    #======================#
-    if not db.shelf:
+    if db.remote_mode and not db.shelf:
         if args.start:
             db.sync_local_dbstore()
         else:
@@ -152,7 +149,7 @@ def controller(db):
                 cry_msg(p.prog, 
                         err_str='error: ', 
                         msg='no such task (#'+str(args.edit)+') in the list')
-        elif args.stop:
+        elif db.remote_mode and args.stop:
             db.sync_remote_dbstore()
         else: # print out contents stored in lists
             db.read_tasks(args.listname, 
@@ -160,7 +157,7 @@ def controller(db):
                           ListDB.convert_int_prio_to_text_prio(args.priority))
 
 def main():
-    db = ListDB('keenhenry/lists')
+    db = ListDB()
     controller(db)
 
 if __name__ == '__main__':

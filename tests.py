@@ -14,7 +14,7 @@ except ImportError:
 class ListDBTests(unittest.TestCase):
 
     def setUp(self):
-        self.db = ListDB('keenhenry/todo')
+        self.db = ListDB()
         self.shelf_path = self.db.DEFAULT_LOCAL_DBPATH
         self.db.sync_local_dbstore()
 

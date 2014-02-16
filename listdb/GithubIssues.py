@@ -10,13 +10,14 @@ import os
 import shelve
 import json
 import sys
+from Config import PdaConfig
 
 class ListDB(object):
     """Base class for representing list database.
     """
 
     # base url to Github Issues API
-    DEFAULT_BASE_URL = "https://api.github.com/repos/"
+    BASE_URL = "https://api.github.com/repos/"
 
     # COLOR constants
     GREEN  = '009800'
@@ -31,23 +32,39 @@ class ListDB(object):
     MEDIUM_IMPORTANCE = 2
     LOW_IMPORTANCE    = 1
 
-    # default local database mirror path
-    DEFAULT_LOCAL_DBPATH = '/tmp/.pdastore'
+    def __init__(self):
 
-    def __init__(self, repo_name):
+        # load basic settings for pda
+        cfg_path = os.path.expanduser('~/.pdaconfig')
 
-        assert repo_name is not None and isinstance(repo_name, str), repo_name
+        if os.path.exists(cfg_path):
+            with open(cfg_path) as f: cfg = PdaConfig(f)
+        else:
+            cfg = PdaConfig()
 
-        self.__url_issues     = self.DEFAULT_BASE_URL + repo_name + "/issues"
-        self.__url_milestones = self.DEFAULT_BASE_URL + repo_name + "/milestones"
-        self.__url_labels     = self.DEFAULT_BASE_URL + repo_name + "/labels"
-        self.__auth           = (os.environ['PDA_AUTH'], '')
-        self.__shelf          = shelve.open(os.path.abspath(self.DEFAULT_LOCAL_DBPATH), 
+        self.__shelf          = shelve.open(os.path.abspath(cfg.local_db_path), 
                                             protocol=-1,
                                             writeback=True)
+        self.__remote_mode    = cfg.remote_mode
+
+        if cfg.remote_mode:
+            repo_name = cfg.username + '/' + cfg.reponame
+            self.__url_issues     = self.BASE_URL + repo_name + "/issues"
+            self.__url_milestones = self.BASE_URL + repo_name + "/milestones"
+            self.__url_labels     = self.BASE_URL + repo_name + "/labels"
+            self.__auth           = (cfg.authtoken, '')
+        else:
+            self.__url_issues     = ''
+            self.__url_milestones = ''
+            self.__url_labels     = ''
+            self.__auth           = ('','')
 
     def __del__(self):
         self.__shelf.close()
+
+    @property
+    def remote_mode(self):
+        return self.__remote_mode
 
     @property
     def shelf(self):
@@ -433,7 +450,7 @@ class ListDB(object):
             del self.shelf[str(task_number)]
 
             # record remove operation in list 'CMDS_HISTORY' in local store
-            if not self._is_cmd_history_annihilable(task_number):
+            if self.remote_mode and not self._is_cmd_history_annihilable(task_number):
                 cmd_history_data = { 'CMD': 'REMOVE', '#': task_number }
                 self.shelf['CMDS_HISTORY'].append(cmd_history_data)
 
@@ -457,13 +474,14 @@ class ListDB(object):
         self.shelf[str(max_task_number)] = issue_data
 
         # record ADD operation in list 'CMDS_HISTORY' in local store
-        cmd_history_data = { '#'        : max_task_number,
-                             'CMD'      : 'ADD', 
-                             'SUMMARY'  : summary,
-                             'TYPE'     : task_type,
-                             'MILESTONE': milestone,
-                             'PRIORITY' : priority }
-        self.shelf['CMDS_HISTORY'].append(cmd_history_data)
+        if self.remote_mode:
+            cmd_history_data = { '#'        : max_task_number,
+                                 'CMD'      : 'ADD', 
+                                 'SUMMARY'  : summary,
+                                 'TYPE'     : task_type,
+                                 'MILESTONE': milestone,
+                                 'PRIORITY' : priority }
+            self.shelf['CMDS_HISTORY'].append(cmd_history_data)
 
         self.shelf.sync()
 
@@ -499,7 +517,7 @@ class ListDB(object):
                 self.shelf[str(task_number)]["priority"] = new_priority
 
             # record EDIT operation in list 'CMDS_HISTORY' in local store
-            if not self._is_locally_created_issue_updated(task_number, new_summary, new_tasktype,
+            if self.remote_mode and not self._is_locally_created_issue_updated(task_number, new_summary, new_tasktype,
                     new_milestone, new_priority):
                 cmd_history_data = { 'CMD'      : 'EDIT', 
                                      '#'        : task_number,
