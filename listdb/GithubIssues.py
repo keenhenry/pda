@@ -46,6 +46,7 @@ class ListDB(object):
                                             protocol=-1,
                                             writeback=True)
         self.__remote_mode    = cfg.remote_mode
+        self.__local_dbpath   = cfg.local_db_path
 
         if cfg.remote_mode:
             repo_name = cfg.username + '/' + cfg.reponame
@@ -61,6 +62,10 @@ class ListDB(object):
 
     def __del__(self):
         self.__shelf.close()
+
+    @property
+    def local_dbpath(self):
+        return self.__local_dbpath
 
     @property
     def remote_mode(self):
@@ -435,7 +440,7 @@ class ListDB(object):
                 self.die_msg('syncing remote failed'), repr(cmd)
 
         # remove local data store after syncing data to remote
-        os.remove(self.DEFAULT_LOCAL_DBPATH)
+        os.remove(self.local_dbpath)
         
     def remove_task(self, task_number):
         """
