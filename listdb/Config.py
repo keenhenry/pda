@@ -5,7 +5,7 @@
 
 """
 
-from ConfigParser import ConfigParser, NoSectionError, DuplicateSectionError
+from ConfigParser import RawConfigParser, NoSectionError, DuplicateSectionError
 import os
 
 class PdaConfig(object):
@@ -17,13 +17,12 @@ class PdaConfig(object):
         'auth-token'   : None
     }
 
-    def __init__(self, fp=None):
+    def __init__(self):
 
-        assert fp is None or isinstance(fp, file), fp
+        self.__config = RawConfigParser(self.DEFAULTS, allow_no_value=True)
 
-        self.__config = ConfigParser(self.DEFAULTS, allow_no_value=True)
-        if fp is not None:
-            self.__config.readfp(fp)
+        # load configurations from several possible locations
+        self.__config.read(['./.pdaconfig', os.path.expanduser('~/.pdaconfig')])
 
     @property
     def local_db_path(self):
@@ -67,17 +66,21 @@ class PdaConfig(object):
             mode = False
         return mode
 
-def main():
+    def change_reponame(self, new_reponame):
 
-    cfg_path = os.path.expanduser('~/.pdaconfig')
-    if os.path.exists(cfg_path):
-        cfg = PdaConfig(open(cfg_path))
-        print cfg.username
-        print cfg.reponame
-        print cfg.authtoken
-        print cfg.local_db_path
-        print cfg.remote_mode
-    
+        assert new_reponame is not None and isinstance(new_reponame, str), new_reponame
+
+        if self.remote_mode:
+            self.__config.set('github', 'repo-name', new_reponame)
+
+def main():
+    cfg = PdaConfig()
+    cfg.change_reponame('todo')
+    print cfg.username
+    print cfg.reponame
+    print cfg.authtoken
+    print cfg.local_db_path
+    print cfg.remote_mode
 
 if __name__ == '__main__':
     main()

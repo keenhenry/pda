@@ -23,6 +23,7 @@ Helper Function
 
 import argparse
 from listdb.GithubIssues import ListDB
+from listdb.Config import PdaConfig
 
 def cry_msg(prog, err_str="", msg=""):
     """
@@ -157,7 +158,7 @@ def controller(db):
                           ListDB.convert_int_prio_to_text_prio(args.priority))
 
 def main():
-    db = ListDB()
+    db = ListDB(PdaConfig())
     controller(db)
 
 if __name__ == '__main__':

@@ -4,6 +4,7 @@ import requests
 import shelve
 import os
 from listdb.GithubIssues import ListDB
+from listdb.Config import PdaConfig
 
 try:
     import unittest2 as unittest
@@ -14,8 +15,10 @@ except ImportError:
 class ListDBTests(unittest.TestCase):
 
     def setUp(self):
-        self.db = ListDB()
-        self.shelf_path = self.db.DEFAULT_LOCAL_DBPATH
+        cfg = PdaConfig()
+        cfg.change_reponame('todo')
+        self.db = ListDB(cfg)
+        self.shelf_path = self.db.local_dbpath
         self.db.sync_local_dbstore()
 
     def tearDown(self):

@@ -32,28 +32,23 @@ class ListDB(object):
     MEDIUM_IMPORTANCE = 2
     LOW_IMPORTANCE    = 1
 
-    def __init__(self):
+    def __init__(self, config):
 
-        # load basic settings for pda
-        cfg_path = os.path.expanduser('~/.pdaconfig')
+        assert config is not None and isinstance(config, PdaConfig), config
 
-        if os.path.exists(cfg_path):
-            with open(cfg_path) as f: cfg = PdaConfig(f)
-        else:
-            cfg = PdaConfig()
+        # initialize instance attributes based on the loaded configuration
+        self.__shelf        = shelve.open(os.path.abspath(config.local_db_path), 
+                                          protocol=-1,
+                                          writeback=True)
+        self.__remote_mode  = config.remote_mode
+        self.__local_dbpath = config.local_db_path
 
-        self.__shelf          = shelve.open(os.path.abspath(cfg.local_db_path), 
-                                            protocol=-1,
-                                            writeback=True)
-        self.__remote_mode    = cfg.remote_mode
-        self.__local_dbpath   = cfg.local_db_path
-
-        if cfg.remote_mode:
-            repo_name = cfg.username + '/' + cfg.reponame
+        if config.remote_mode:
+            repo_name = config.username + '/' + config.reponame
             self.__url_issues     = self.BASE_URL + repo_name + "/issues"
             self.__url_milestones = self.BASE_URL + repo_name + "/milestones"
             self.__url_labels     = self.BASE_URL + repo_name + "/labels"
-            self.__auth           = (cfg.authtoken, '')
+            self.__auth           = (config.authtoken, '')
         else:
             self.__url_issues     = ''
             self.__url_milestones = ''
@@ -562,10 +557,13 @@ class ListDB(object):
 
 def main():
 
-    # create db object
-    db = ListDB()
+    # load basic settings for pda
+    cfg = PdaConfig()
 
-    db.sync_local_dbstore()
+    # create db object
+    db = ListDB(cfg)
+
+    # db.sync_local_dbstore()
     # db.read_tasks()
     # db.edit_task(task_number=50, new_tasktype='tolearn')
     # db.read_tasks()
@@ -578,7 +576,7 @@ def main():
     # db.remove_task(46)
     # db.remove_task(48)
     db.read_tasks()
-    db.sync_remote_dbstore()
+    # db.sync_remote_dbstore()
 
 if __name__ == '__main__':
     main()
