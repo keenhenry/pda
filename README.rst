@@ -20,8 +20,8 @@ as available list names. Lists data is stored on `Github Issue <http://bit.ly/18
 accessed through ``pda`` command line interface, which is explained below:
 
 
-*CREATE* tasks in a list
-^^^^^^^^^^^^^^^^^^^^^^^^
+CREATE tasks
+^^^^^^^^^^^^
 
 ::
 
@@ -37,8 +37,8 @@ accessed through ``pda`` command line interface, which is explained below:
     $ pda -a <task summary text> <-t PERIOD> <-p PRIORITY> <listname>
 
 
-*UPDATE* lists
-^^^^^^^^^^^^^^
+UPDATE tasks
+^^^^^^^^^^^^
 
 ::
 
@@ -58,8 +58,8 @@ accessed through ``pda`` command line interface, which is explained below:
     $ pda -e <N> -s <task summary text> <-t PERIOD> <-p PRIORITY> <listname>
 
 
-*QUERY* lists
-^^^^^^^^^^^^^
+QUERY lists
+^^^^^^^^^^^
 
 ::
 
