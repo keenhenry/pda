@@ -1,17 +1,18 @@
+================================
 Personal Desktop Assistant - pda
 ================================
 
 `pda` is a command line tool used to manage useful lists in your daily ife - such as TODO, 
 TOLEARN and TOREAD lists, etc. You can use it to create as many lists as you want.
 
-## Install
+Install
+-------
+::
+    # to be completed later
 
-```bash
-# to be completed later
-```
 
-
-## Synopsis
+Synopsis
+--------
 
 List names can be any string you want, personally I have __todo__, __tolearn__ and __toread__
 as available list names. Lists data is stored on [Github Issue](bit.ly/18YAS2p) and accessed 
