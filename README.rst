@@ -16,11 +16,12 @@ Synopsis
 --------
 
 List names can be any string you want, personally I have **todo**, **tolearn** and **toread**
-as available list names. Lists data is stored on `Github Issue <bit.ly/18YAS2p>`_ and accessed 
-through ``pda`` command line interface, which is explained below:
+as available list names. Lists data is stored on `Github Issue <http://bit.ly/18YAS2p>`_ and 
+accessed through ``pda`` command line interface, which is explained below:
 
-CREATE tasks in a list
-^^^^^^^^^^^^^^^^^^^^^^
+
+*CREATE* tasks in a list
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -36,10 +37,11 @@ CREATE tasks in a list
 $ pda -a <task summary text> <-t PERIOD> <-p PRIORITY> <listname>
 
 
-UPDATE lists
-^^^^^^^^^^^^
+*UPDATE* lists
+^^^^^^^^^^^^^^
 
-```bash
+::
+
 # delete a task numbered <N>
 $ pda -r <N>
 
@@ -54,11 +56,13 @@ $ pda -r <N>
 #      allowed values are => 1 (low), 2 (medium), 3 (high), 4 (must), 5 (urgent must)
 # <lisname> specifies the NEW list this task belongs to
 $ pda -e <N> -s <task summary text> <-t PERIOD> <-p PRIORITY> <listname>
-```
 
-### QUERY lists
 
-```bash
+*QUERY* lists
+^^^^^^^^^^^^^
+
+::
+
 # list ALL the tasks stored in the database (Github Issue)
 $ pda
 
@@ -75,4 +79,3 @@ $ pda <-p PRIORITY>
 #                      and have priority PRIORITY
 #                      and belongs to the list named <listname>
 $ pda <-t PERIOD> <-p PRIORITY> <listname>
-```
