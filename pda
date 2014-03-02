@@ -22,8 +22,10 @@ Helper Function
 """
 
 import argparse
+from listdb import __version__
 from listdb.GithubIssues import ListDB
 from listdb.Config import PdaConfig
+
 
 def cry_msg(prog, err_str="", msg=""):
     """
@@ -116,7 +118,7 @@ def controller(db):
     #======================#
     # Create Other Options #
     #======================#
-    p.add_argument('--version', action='version', version='%(prog)s 0.0.4')
+    p.add_argument('--version', action='version', version='%(prog)s '+__version__)
 
     #=============================================================#
     # Parsing options and perform appropriate actions accordingly #
