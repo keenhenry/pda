@@ -1,1 +1,1 @@
-include pda README.rst LICENSE.txt
+include pda tests.py README.rst LICENSE.txt
