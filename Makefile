@@ -1,2 +1,5 @@
+test:
+	nosetests test_pda.py
+
 clean:
-	rm *.pyc MANIFEST -rf
+	rm *.py[cod] MANIFEST -rf
