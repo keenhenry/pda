@@ -11,12 +11,6 @@ Install
 
     $ sudo python setup.py install
 
-or:::
-    
-    $ easy_install pda
-
-
-
 
 Synopsis
 --------
