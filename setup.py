@@ -22,7 +22,6 @@ packages=find_packages(),
 entry_points={
     'console_scripts': ['pda = pda.pda:main']
 },
-# scripts=['pda'],
 
 # metadata
 author="Henry Huang",
