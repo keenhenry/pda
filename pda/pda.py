@@ -22,7 +22,6 @@ Helper Function
 """
 
 import argparse
-from listdb import __version__
 from listdb.GithubIssues import ListDB
 from listdb.Config import PdaConfig
 
@@ -118,7 +117,7 @@ def controller(db):
     #======================#
     # Create Other Options #
     #======================#
-    p.add_argument('--version', action='version', version='%(prog)s '+__version__)
+    p.add_argument('--version', action='version', version='%(prog)s 0.1.1')
 
     #=============================================================#
     # Parsing options and perform appropriate actions accordingly #
