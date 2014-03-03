@@ -3,8 +3,8 @@
 import requests
 import shelve
 import os
-from listdb.GithubIssues import ListDB
-from listdb.Config import PdaConfig
+from pda.listdb.GithubIssues import ListDB
+from pda.listdb.Config import PdaConfig
 
 try:
     import unittest2 as unittest
