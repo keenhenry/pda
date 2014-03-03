@@ -9,7 +9,13 @@ Install
 -------
 ::
 
-    # to be completed later
+    $ sudo python setup.py install
+
+or:::
+    
+    $ easy_install pda
+
+
 
 
 Synopsis
