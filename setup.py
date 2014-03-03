@@ -2,13 +2,13 @@
 
 import sys
 from setuptools import setup, find_packages
-from listdb import __version__
+from pda import __version__
 
 with open('README.rst') as f:
     long_description = f.read()
 
 extra_kwargs = {}
-extra_kwargs['test_suite']       = 'tests'
+extra_kwargs['test_suite']       = 'test_pda'
 extra_kwargs['install_requires'] = ['requests']
 
 if sys.version_info < (2, 7):
@@ -19,7 +19,10 @@ setup(
 name="pda",
 version=__version__,
 packages=find_packages(),
-scripts=['pda'],
+entry_points={
+    'console_scripts': ['pda = pda.pda:main']
+},
+# scripts=['pda'],
 
 # metadata
 author="Henry Huang",
