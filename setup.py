@@ -20,7 +20,7 @@ name="pda",
 version=__version__,
 packages=find_packages(),
 entry_points={
-    'console_scripts': ['pda = pda.pda:main']
+    'console_scripts': ['pda = pda.control:main']
 },
 
 # metadata
