@@ -13,26 +13,14 @@ Core Function
 
 - `controller()`: bridging function between Github Issue and terminal interface
 
-===============
-Helper Function
-===============
-
-- `cry_msg()`: emitting console messages
-
 """
 
 import argparse
+import utils
 from listdb.GithubIssues import ListDB
 from listdb.Config import PdaConfig
+from . import __version__
 
-
-def cry_msg(prog, err_str="", msg=""):
-    """
-    :param prog:    string
-    :param err_str: string
-    :param msg:     string
-    """
-    print '{}: {}{}'.format(prog, err_str, msg)
 
 def controller(db):
     """
@@ -117,7 +105,7 @@ def controller(db):
     #======================#
     # Create Other Options #
     #======================#
-    p.add_argument('--version', action='version', version='%(prog)s 0.1.1')
+    p.add_argument('--version', action='version', version='%(prog)s '+__version__)
 
     #=============================================================#
     # Parsing options and perform appropriate actions accordingly #
@@ -128,15 +116,15 @@ def controller(db):
         if args.start:
             db.sync_local_dbstore()
         else:
-            cry_msg(p.prog, msg='please execute "pda --start" first; and "pda --stop" before leaving pda')
+            utils.cry_msg(p.prog, msg='please execute "pda --start" first; and "pda --stop" before leaving pda')
     else:
         if args.remove:
             if db.has_task(args.remove):
                 db.remove_task(args.remove)
             else:
-                cry_msg(p.prog, 
-                        err_str='error: ', 
-                        msg='no such task (#'+str(args.remove)+') in the list')
+                utils.cry_msg(p.prog, 
+                              err_str='error: ', 
+                              msg='no such task (#'+str(args.remove)+') in the list')
         elif args.add:
             db.add_task(args.add, task_type=args.listname, 
                                   milestone=ListDB.extend_milestone(args.time), 
@@ -148,9 +136,9 @@ def controller(db):
                                         new_milestone=ListDB.extend_milestone(args.time),
                                         new_priority=ListDB.convert_int_prio_to_text_prio(args.priority))
             else:
-                cry_msg(p.prog, 
-                        err_str='error: ', 
-                        msg='no such task (#'+str(args.edit)+') in the list')
+                utils.cry_msg(p.prog, 
+                              err_str='error: ', 
+                              msg='no such task (#'+str(args.edit)+') in the list')
         elif db.remote_mode and args.stop:
             db.sync_remote_dbstore()
         else: # print out contents stored in lists
