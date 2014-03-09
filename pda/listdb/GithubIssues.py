@@ -544,9 +544,6 @@ class ListDB(object):
             if key != 'CMDS_HISTORY':
                 self._print_task(key, task_type, milestone, priority)
 
-        # DEBUG: check CMDS_HISTORY
-        # print 'History:', repr(self.shelf['CMDS_HISTORY'])
-
     def die_msg(self, msg=''):
         """
         :param msg: string
@@ -554,29 +551,3 @@ class ListDB(object):
 
         print '{}: error: {}'.format('pda', msg)
         sys.exit(1)
-
-def main():
-
-    # load basic settings for pda
-    cfg = PdaConfig()
-
-    # create db object
-    db = ListDB(cfg)
-
-    # db.sync_local_dbstore()
-    # db.read_tasks()
-    # db.edit_task(task_number=50, new_tasktype='tolearn')
-    # db.read_tasks()
-    # number = db.add_task('2nd wrong formatted issue', task_type='todo')
-    # db.read_tasks()
-    # db.edit_task(task_number=number, new_milestone='week', new_priority='urgmust')
-    # db.read_tasks()
-    # db.remove_task(42)
-    # db.remove_task(44)
-    # db.remove_task(46)
-    # db.remove_task(48)
-    db.read_tasks()
-    # db.sync_remote_dbstore()
-
-if __name__ == '__main__':
-    main()
