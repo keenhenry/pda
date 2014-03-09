@@ -16,7 +16,7 @@ class ListDBTests(unittest.TestCase):
 
     def setUp(self):
         cfg = PdaConfig()
-        cfg.change_reponame('todo')
+        cfg.reponame = 'todo'
         self.db = ListDB(cfg)
         self.shelf_path = self.db.local_dbpath
         self.db.sync_local_dbstore()
