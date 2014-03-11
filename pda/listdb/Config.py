@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-`Config` is a module which implements configuration for `ListDB`.
+``Config`` is a module which implements configuration abstraction for `ListDB`.
 
 """
 
@@ -24,11 +24,15 @@ class PdaConfig(object):
             self.__config = ConfigParser.RawConfigParser(self.DEFAULTS)
             self.__config.read(['./.pdaconfig', os.path.expanduser('~/.pdaconfig')])
         except ConfigParser.ParsingError, err:
+            # TODO: make the following print statements into a function call
             print 'pda:', err
             print 'pda:', 'using default settings instead ...'
 
     @property
     def local_db_path(self):
+        """local_db_path attribute getter
+        """
+
         try:
             path = self.__config.get('pda', 'database-path')
         except ConfigParser.NoSectionError or ConfigParser.DuplicateSectionError:
@@ -38,6 +42,9 @@ class PdaConfig(object):
 
     @property
     def username(self):
+        """username attribute getter
+        """
+
         try:
             name = self.__config.get('github', 'username')
         except ConfigParser.NoSectionError or ConfigParser.DuplicateSectionError:
@@ -47,6 +54,9 @@ class PdaConfig(object):
 
     @property
     def reponame(self):
+        """reponame attribute getter
+        """
+
         try:
             name = self.__config.get('github', 'repo-name')
         except ConfigParser.NoSectionError or ConfigParser.DuplicateSectionError:
@@ -56,6 +66,9 @@ class PdaConfig(object):
 
     @reponame.setter
     def reponame(self, new_reponame):
+        """reponame attribute setter
+        :param new_reponame: None or string
+        """
 
         assert new_reponame is not None and isinstance(new_reponame, str), new_reponame
 
@@ -64,6 +77,9 @@ class PdaConfig(object):
 
     @property
     def authtoken(self):
+        """authtoken attribute getter
+        """
+
         try:
             token = self.__config.get('github', 'auth-token')
         except ConfigParser.NoSectionError or ConfigParser.DuplicateSectionError:
@@ -73,6 +89,9 @@ class PdaConfig(object):
 
     @property
     def remote_mode(self):
+        """remote_mode attribute getter
+        """
+
         return (self.username is not None) and \
                (self.reponame is not None) and \
                (self.authtoken is not None)
