@@ -10,6 +10,8 @@ import os
 import shelve
 import json
 import sys
+
+from pda import utils
 from Config import PdaConfig
 
 class ListDB(object):
@@ -161,7 +163,7 @@ class ListDB(object):
             if rep.status_code == requests.codes.created:
                 labels.append(name)
             else:
-                self.die_msg('label created failed: '+ name)
+                utils.die_msg('label created failed: '+ name)
 
     def _update_labels(self, cmd):
         """
@@ -195,7 +197,7 @@ class ListDB(object):
             if issue_prio and issue_prio not in labels:
                 labels.append(issue_prio)
         else:
-            self.die_msg('failed to retrive labels for current issue: '+str(issue_number))
+            utils.die_msg('failed to retrive labels for current issue: '+str(issue_number))
 
         return labels
 
@@ -233,7 +235,7 @@ class ListDB(object):
                         milestone_number = milestone['number']
                         break
             else:
-                self.die_msg('retrieving milestone failed')
+                utils.die_msg('retrieving milestone failed')
 
         # milestone not created yet, create one
         if milestone_title and not milestone_number:
@@ -244,7 +246,7 @@ class ListDB(object):
             if r.status_code == requests.codes.created:
                 milestone_number = r.json()['number']
             else:
-                self.die_msg('create milestone failed')
+                utils.die_msg('create milestone failed')
 
         return milestone_number
 
@@ -284,7 +286,7 @@ class ListDB(object):
             url += '/'+str(cmd['#']) 
             self._prepare_payload_for_add_or_edit(cmd, payload)
         else: # should never reach here!
-            self.die_msg('CMD type unknown in command history')
+            utils.die_msg('CMD type unknown in command history')
 
         return url, payload
 
@@ -424,7 +426,7 @@ class ListDB(object):
             # sync to local store
             self.shelf.sync()
         else:
-            die_msg('syncing to local store failed')
+            utils.die_msg('syncing to local store failed')
 
     def sync_remote_dbstore(self):
 
@@ -432,7 +434,7 @@ class ListDB(object):
         for cmd in self.shelf['CMDS_HISTORY']:
             ok = self._exec_cmd_on_remote(cmd)
             if not ok:
-                self.die_msg('syncing remote failed'), repr(cmd)
+                utils.die_msg('syncing remote failed'), repr(cmd)
 
         # remove local data store after syncing data to remote
         os.remove(self.local_dbpath)
@@ -543,11 +545,3 @@ class ListDB(object):
         for key in self.shelf:
             if key != 'CMDS_HISTORY':
                 self._print_task(key, task_type, milestone, priority)
-
-    def die_msg(self, msg=''):
-        """
-        :param msg: string
-        """
-
-        print '{}: error: {}'.format('pda', msg)
-        sys.exit(1)

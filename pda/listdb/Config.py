@@ -7,6 +7,7 @@
 
 import ConfigParser
 import os
+from pda import utils
 
 class PdaConfig(object):
 
@@ -24,9 +25,8 @@ class PdaConfig(object):
             self.__config = ConfigParser.RawConfigParser(self.DEFAULTS)
             self.__config.read(['./.pdaconfig', os.path.expanduser('~/.pdaconfig')])
         except ConfigParser.ParsingError, err:
-            # TODO: make the following print statements into a function call
-            print 'pda:', err
-            print 'pda:', 'using default settings instead ...'
+            # crash pda when configuration file is ill-formatted
+            utils.die_msg('pda', msg=err)
 
     @property
     def local_db_path(self):
