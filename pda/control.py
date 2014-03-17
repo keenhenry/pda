@@ -17,14 +17,14 @@ Core Function
 
 import argparse
 import utils
-from listdb.GithubIssues import ListDB
+from listdb.ListDB import GithubIssues
 from listdb.Config import PdaConfig
 from . import __version__
 
 
 def controller(db):
     """
-    :param db: :class:`listdb.GithubIssues.ListDB`
+    :param db: :class:`listdb.ListDB.GithubIssues`
     """
 
     # create instance of ArgumentParser Module 
@@ -127,14 +127,14 @@ def controller(db):
                               msg='no such task (#'+str(args.remove)+') in the list')
         elif args.add:
             db.add_task(args.add, task_type=args.listname, 
-                                  milestone=ListDB.extend_milestone(args.time), 
-                                  priority=ListDB.convert_int_prio_to_text_prio(args.priority))
+                                  milestone=db.extend_milestone(args.time), 
+                                  priority=db.convert_int_prio_to_text_prio(args.priority))
         elif args.edit:
             if db.has_task(args.edit):
                 db.edit_task(args.edit, new_summary=args.summary, 
                                         new_tasktype=args.listname,
-                                        new_milestone=ListDB.extend_milestone(args.time),
-                                        new_priority=ListDB.convert_int_prio_to_text_prio(args.priority))
+                                        new_milestone=db.extend_milestone(args.time),
+                                        new_priority=db.convert_int_prio_to_text_prio(args.priority))
             else:
                 utils.cry_msg(p.prog, 
                               err_str='error: ', 
@@ -143,11 +143,11 @@ def controller(db):
             db.sync_remote_dbstore()
         else: # print out contents stored in lists
             db.read_tasks(args.listname, 
-                          ListDB.extend_milestone(args.time), 
-                          ListDB.convert_int_prio_to_text_prio(args.priority))
+                          db.extend_milestone(args.time), 
+                          db.convert_int_prio_to_text_prio(args.priority))
 
 def main():
-    db = ListDB(PdaConfig())
+    db = GithubIssues(PdaConfig())
     controller(db)
 
 if __name__ == '__main__':

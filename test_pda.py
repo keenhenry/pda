@@ -2,7 +2,7 @@
 
 import requests
 import os
-from pda.listdb.GithubIssues import ListDB
+from pda.listdb.ListDB import GithubIssues
 from pda.listdb.Config import PdaConfig
 
 try:
@@ -16,7 +16,7 @@ class ListDBTests(unittest.TestCase):
     def setUp(self):
         cfg = PdaConfig()
         cfg.reponame = 'todo'
-        self.db = ListDB(cfg)
+        self.db = GithubIssues(cfg)
         self.shelf_path = self.db.local_dbpath
         self.db.sync_local_dbstore()
 
