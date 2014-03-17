@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import requests
-import shelve
 import os
 from pda.listdb.GithubIssues import ListDB
 from pda.listdb.Config import PdaConfig
@@ -134,10 +133,10 @@ class ListDBTests(unittest.TestCase):
                 number = task_numbers.pop()
                 self.db.remove_task(int(number))
 
-            # (2) add a task
-            added_1st = self.db.add_task('first added', 'tolearn', 'month', 'low')
+            # (2) add a task locally
+            self.db.add_task('first added', 'tolearn', 'month', 'low')
 
-            # (3) add a task
+            # (3) add another task
             added_2nd = self.db.add_task('secondly added', 'todo', 'year', 'high')
 
             # (4) edit a locally added task
