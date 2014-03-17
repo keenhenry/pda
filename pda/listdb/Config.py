@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-``Config`` is a module which implements configuration abstraction for `ListDB`.
+``Config`` module holds all the configuration related implementations used in ``listdb`` package.
 
 """
 
@@ -10,6 +10,11 @@ import os
 from pda import utils
 
 class PdaConfig(object):
+    """
+    ``PdaConfig`` is a class which implements configuration abstraction for ``ListDB`` 
+    class in ``GithubIssues`` module.
+
+    """
 
     DEFAULTS = {
         'database-path': '/tmp/.pdastore',
@@ -67,7 +72,7 @@ class PdaConfig(object):
     @reponame.setter
     def reponame(self, new_reponame):
         """reponame attribute setter
-        :param new_reponame: None or string
+        :param new_reponame: string
         """
 
         assert new_reponame is not None and isinstance(new_reponame, str), new_reponame
