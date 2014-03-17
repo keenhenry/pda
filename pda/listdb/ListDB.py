@@ -1,21 +1,27 @@
 #!/usr/bin/env python
 
 """
-`ListDB` is a data model abstraction of the list databse used by `pda`.
+``ListDB`` is a module collecting implementations for data model abstraction of the 
+list databse(s) used by ``pda``.
 
 """
 
-import requests
 import os
 import shelve
+import requests
 import json
-import sys
 
 from pda import utils
 from Config import PdaConfig
 
-class ListDB(object):
-    """Base class for representing list database.
+class GithubIssues(object):
+    """A class representing one list database abstraction for pda.
+
+    ``GithubIssues`` always stores data locally in a permanent data store abstracted 
+    by python ``shelve``. And depends on the configuration, data might also be 
+    synced/stored on **Github Issues**, if **Github Issues** credentials is 
+    provided in the configuration.
+
     """
 
     # base url to Github Issues API
@@ -35,6 +41,9 @@ class ListDB(object):
     LOW_IMPORTANCE    = 1
 
     def __init__(self, config):
+        """
+        :param config: :class: `PdaConfig <PdaConfig>` object.
+        """
 
         assert config is not None and isinstance(config, PdaConfig), config
 
