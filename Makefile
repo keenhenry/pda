@@ -1,7 +1,9 @@
-dev:
+.PHONY: devinstall devuninstall test clean
+
+devinstall:
 	python setup.py develop
 
-dev-uninstall:
+devuninstall:
 	python setup.py develop --uninstall
 	rm `which pda` -rf
 	rm pda.egg-info/ -rf
@@ -9,7 +11,7 @@ dev-uninstall:
 test:
 	tox
 
-clean:
+clean: devuninstall
 	rm MANIFEST -rf
 	rm .tox* -rf
 	rm *egg/ -rf
