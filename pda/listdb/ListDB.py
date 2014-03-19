@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 """
-``ListDB`` is a module collecting implementations for data model abstraction of the 
-list databse(s) used by ``pda``.
+``ListDB`` is a module collecting implementations for data model abstraction of 
+the list databse(s) used by ``pda``.
 
 """
 
@@ -48,9 +48,9 @@ class GithubIssues(object):
         assert config is not None and isinstance(config, PdaConfig), config
 
         # initialize instance attributes based on the loaded configuration
-        self.__shelf        = shelve.open(os.path.abspath(config.local_db_path), 
-                                          protocol=-1,
-                                          writeback=True)
+        self.__shelf = shelve.open(os.path.abspath(config.local_db_path), 
+                                   protocol=-1,
+                                   writeback=True)
         self.__remote_mode  = config.remote_mode
         self.__local_dbpath = config.local_db_path
 
@@ -71,43 +71,77 @@ class GithubIssues(object):
 
     @property
     def local_dbpath(self):
+        """the path to the local shelve db store
+        :rtype: string
+        """
         return self.__local_dbpath
 
     @property
     def remote_mode(self):
+        """Is ``GithubIssues`` in remote mode or not?
+        :rtype: bool
+        """
         return self.__remote_mode
 
     @property
     def shelf(self):
+        """a handle to shelf object
+        :rtype: :class: `shelf <shelf>` object
+        """
         return self.__shelf
 
     @property
     def url_issues(self):
+        """the URL to fetch repo issues stored on **Github Issues**
+        :rtype: string
+        """
         return self.__url_issues
 
     @property
     def url_milestones(self):
+        """the URL to fetch repo milestones stored on **Github Issues**
+        :rtype: string
+        """
         return self.__url_milestones
 
     @property
     def url_labels(self):
+        """the URL to fetch repo labels stored on **Github Issues**
+        :rtype: string
+        """
         return self.__url_labels
 
     @property
     def auth(self):
+        """authentication token used to communicate to **Github Issues**
+        :rtype: tuple
+        """
         return self.__auth
 
     @property
     def max_task_number(self):
-        return max(int(task_no) for task_no in self.shelf if task_no != 'CMDS_HISTORY')
+        """current maximum task number in local shelve data store
+        :rtype: integer
+        """
+        return max(int(task_no) for task_no in self.shelf \
+                                 if task_no != 'CMDS_HISTORY')
 
-    def _is_selected(self, task_type_in_db, task_type_requested, 
-                           milestone_in_db, milestone_requested, 
-                           priority_in_db, priority_requested):
+    def _is_selected(self, task_no, task_type, milestone, priority):
+        """method to check if current task is selected for output printing
+        :param task_no: string
+        :param task_type: None or string
+        :param milestone: None or string
+        :param priority: None or string
+        :rtype: True or False
+        """
 
-        return (task_type_requested is None or task_type_requested == task_type_in_db) and \
-               (milestone_requested is None or milestone_requested == milestone_in_db) and \
-               (priority_requested is None or priority_requested == priority_in_db)
+        task_type_in_shelf = self.shelf[task_no]['type']
+        milestone_in_shelf = self.shelf[task_no]['milestone']
+        priority_in_shelf  = self.shelf[task_no]['priority']
+
+        return (task_type is None or task_type == task_type_in_shelf) and \
+               (milestone is None or milestone == milestone_in_shelf) and \
+               (priority  is None or priority  == priority_in_shelf)
 
     def _is_cmd_history_annihilable(self, task_number):
         """
@@ -339,15 +373,13 @@ class GithubIssues(object):
         :param priority : None or string
         """
 
-        if self._is_selected(self.shelf[task_number]['type'], task_type,
-                             self.shelf[task_number]['milestone'], milestone,
-                             self.shelf[task_number]['priority'], priority):
+        if self._is_selected(task_number, task_type, milestone, priority):
             print u'{:<5}  {:<60}  {:<9}  {:<8}  {:<8}'.format(
-                                                         task_number, 
-                                                         self.shelf[task_number]["summary"], 
-                                                         self.shelf[task_number]["type"], 
-                                                         self.shelf[task_number]["milestone"], 
-                                                         self.shelf[task_number]["priority"])
+                  task_number, 
+                  self.shelf[task_number]["summary"], 
+                  self.shelf[task_number]["type"], 
+                  self.shelf[task_number]["milestone"], 
+                  self.shelf[task_number]["priority"])
 
     @staticmethod
     def extend_milestone(milestone):
