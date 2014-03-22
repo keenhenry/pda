@@ -115,8 +115,7 @@ def controller(_db):
             _db.sync_local_dbstore()
         else:
             cry_msg(p.prog, 
-                    msg='please execute "pda --start" first; \
-                         and "pda --stop" before leaving pda')
+                    msg='please execute "pda --start" first; and "pda --stop" before leaving pda')
     else:
         if args.remove:
             if _db.has_task(args.remove):
