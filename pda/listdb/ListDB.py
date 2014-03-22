@@ -11,8 +11,8 @@ import shelve
 import requests
 import json
 
-from pda import utils
-from Config import PdaConfig
+from ..utils import die_msg, print_header
+from .Config import PdaConfig
 
 class GithubIssues(object):
     """A class representing one list database abstraction for pda.
@@ -212,7 +212,7 @@ class GithubIssues(object):
             else:
                 # TODO: should not hard-coded 'pda' to first argument
                 # make it a variable in utils module
-                utils.die_msg('pda', 'label created failed: ' + name)
+                die_msg('pda', 'label created failed: ' + name)
 
     def _update_labels(self, cmd):
         """
@@ -248,8 +248,8 @@ class GithubIssues(object):
             if issue_prio and issue_prio not in labels:
                 labels.append(issue_prio)
         else:
-            utils.die_msg('pda', \
-                          'failed to retrive labels for current issue: '+str(issue_number))
+            die_msg('pda', \
+                    'failed to retrive labels for current issue: '+str(issue_number))
 
         return labels
 
@@ -287,7 +287,7 @@ class GithubIssues(object):
                         milestone_number = milestone['number']
                         break
             else:
-                utils.die_msg('pda', 'retrieving milestone failed')
+                die_msg('pda', 'retrieving milestone failed')
 
         # milestone not created yet, create one
         if milestone_title and not milestone_number:
@@ -298,7 +298,7 @@ class GithubIssues(object):
             if resp.status_code == requests.codes.created:
                 milestone_number = resp.json()['number']
             else:
-                utils.die_msg('pda', 'create milestone failed')
+                die_msg('pda', 'create milestone failed')
 
         return milestone_number
 
@@ -338,7 +338,7 @@ class GithubIssues(object):
             url += '/'+str(cmd['#']) 
             self._get_payload_for_add_or_edit(cmd, payload)
         else: # should never reach here!
-            utils.die_msg('pda', 'CMD type unknown in command history')
+            die_msg('pda', 'CMD type unknown in command history')
 
         return url, payload
 
@@ -472,7 +472,7 @@ class GithubIssues(object):
             # sync to local store
             self.shelf.sync()
         else:
-            utils.die_msg('pda', 'syncing to local store failed')
+            die_msg('pda', 'syncing to local store failed')
 
     def sync_remote_dbstore(self):
         """method to sync tasks from local data store with **Github Issues**
@@ -482,7 +482,7 @@ class GithubIssues(object):
         for cmd in self.shelf['CMDS_HISTORY']:
             _ok = self._exec_cmd_on_remote(cmd)
             if not _ok:
-                utils.die_msg('pda', 'syncing remote failed')
+                die_msg('pda', 'syncing remote failed')
 
         # remove local data store after syncing data to remote
         os.remove(self.local_dbpath)
@@ -601,8 +601,7 @@ class GithubIssues(object):
         assert milestone is None or isinstance(milestone, str), milestone
         assert priority  is None or isinstance(priority,  str), priority
 
-        # self._print_header()
-        utils.print_header()
+        print_header()
         for key in self.shelf:
             if key != 'CMDS_HISTORY':
                 self._print_task(key, task_type, milestone, priority)

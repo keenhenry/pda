@@ -100,15 +100,3 @@ class PdaConfig(object):
         return (self.username is not None) and \
                (self.reponame is not None) and \
                (self.authtoken is not None)
-
-def main():
-    cfg = PdaConfig()
-    cfg.reponame = 'todo'
-    print cfg.username
-    print cfg.reponame
-    print cfg.authtoken
-    print cfg.local_db_path
-    print cfg.remote_mode
-
-if __name__ == '__main__':
-    main()
