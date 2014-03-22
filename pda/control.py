@@ -1,42 +1,38 @@
 #!/usr/bin/env python
 
-"""
-A simple command line tool to manage personal todo list, tolearn list, 
-toread list, and all sorts of other lists you can imagine.
+"""``control.py`` module
 
-`pda` makes use of `Requests library <http://docs.python-requests.org/en/latest/>`_
-to communicate with Github Issue API; all the data are stored at Github Issue.
+This module serve as the 'C' in MVC pattern; it is bridging the view 
+(command line interface) and the model (listdb package) to make ``pda``
+work.
 
-=============
-Core Function
-=============
-
-- `controller()`: bridging function between Github Issue and terminal interface
+This module is also the application entry point which should be run as
+the **main** script.
 
 """
 
 import argparse
-import utils
-from listdb.ListDB import GithubIssues
-from listdb.Config import PdaConfig
+from .utils import cry_msg
+from .listdb.ListDB import GithubIssues
+from .listdb.Config import PdaConfig
 from . import __version__
 
 
-def controller(db):
-    """
-    :param db: :class:`listdb.ListDB.GithubIssues`
+def controller(_db):
+    """Bridging function between data model (listdb) and view (command line)
+    :param _db: :class:`listdb.ListDB.GithubIssues`
     """
 
     # create instance of ArgumentParser Module 
     p = argparse.ArgumentParser(
-            description = '''A Personal Desktop Assistant to manage useful lists, 
-                             such as TODO, TOLEARN, TOREAD, etc. If [OPTION] is omitted, 
-                             the default behavior is to print out the content of the list 
-                             named [listname]; if both [OPTION] and [listname] are omitted, 
-                             default behavior is to print out contents of all lists.''',
-            prog        = 'pda',
-            usage       = '%(prog)s [OPTION]... [listname]'
-        )
+        description = '''A Personal Desktop Assistant to manage useful lists, 
+                         such as todo, tolearn, toread, etc. If [OPTION] is 
+                         omitted, the default behavior is to print out the 
+                         content of the list named [listname]; if both [OPTION] 
+                         and [listname] are omitted, default behavior is to 
+                         print out contents of all lists.''',
+        prog        = 'pda',
+        usage       = '%(prog)s [OPTION]... [listname]')
 
     #=============================#
     # Create Positional Arguments #
@@ -105,50 +101,58 @@ def controller(db):
     #======================#
     # Create Other Options #
     #======================#
-    p.add_argument('--version', action='version', version='%(prog)s '+__version__)
+    p.add_argument('--version', 
+                   action='version', 
+                   version='%(prog)s '+__version__)
 
     #=============================================================#
     # Parsing options and perform appropriate actions accordingly #
     #=============================================================#
     args = p.parse_args()
 
-    if db.remote_mode and not db.shelf:
+    if _db.remote_mode and not _db.shelf:
         if args.start:
-            db.sync_local_dbstore()
+            _db.sync_local_dbstore()
         else:
-            utils.cry_msg(p.prog, msg='please execute "pda --start" first; and "pda --stop" before leaving pda')
+            cry_msg(p.prog, 
+                    msg='please execute "pda --start" first; \
+                         and "pda --stop" before leaving pda')
     else:
         if args.remove:
-            if db.has_task(args.remove):
-                db.remove_task(args.remove)
+            if _db.has_task(args.remove):
+                _db.remove_task(args.remove)
             else:
-                utils.cry_msg(p.prog, 
-                              err_str='error: ', 
-                              msg='no such task (#'+str(args.remove)+') in the list')
+                cry_msg(p.prog, 
+                        err_str='error: ', 
+                        msg='no such task (#'+str(args.remove)+') in the list')
         elif args.add:
-            db.add_task(args.add, task_type=args.listname, 
-                                  milestone=db.extend_milestone(args.time), 
-                                  priority=db.convert_int_prio_to_text_prio(args.priority))
+            _db.add_task(args.add, 
+                         task_type=args.listname, 
+                         milestone=_db.extend_milestone(args.time), 
+                         priority=_db.convert_int_prio_to_text_prio(args.priority))
         elif args.edit:
-            if db.has_task(args.edit):
-                db.edit_task(args.edit, new_summary=args.summary, 
-                                        new_tasktype=args.listname,
-                                        new_milestone=db.extend_milestone(args.time),
-                                        new_priority=db.convert_int_prio_to_text_prio(args.priority))
+            if _db.has_task(args.edit):
+                _db.edit_task(args.edit, 
+                              new_summary=args.summary, 
+                              new_tasktype=args.listname,
+                              new_milestone=_db.extend_milestone(args.time),
+                              new_priority=_db.convert_int_prio_to_text_prio(args.priority))
             else:
-                utils.cry_msg(p.prog, 
-                              err_str='error: ', 
-                              msg='no such task (#'+str(args.edit)+') in the list')
-        elif db.remote_mode and args.stop:
-            db.sync_remote_dbstore()
+                cry_msg(p.prog, 
+                        err_str='error: ', 
+                        msg='no such task (#'+str(args.edit)+') in the list')
+        elif _db.remote_mode and args.stop:
+            _db.sync_remote_dbstore()
         else: # print out contents stored in lists
-            db.read_tasks(args.listname, 
-                          db.extend_milestone(args.time), 
-                          db.convert_int_prio_to_text_prio(args.priority))
+            _db.read_tasks(args.listname, 
+                           _db.extend_milestone(args.time), 
+                           _db.convert_int_prio_to_text_prio(args.priority))
 
 def main():
-    db = GithubIssues(PdaConfig())
-    controller(db)
+    """``pda`` entry point
+    """
+    _db = GithubIssues(PdaConfig())
+    controller(_db)
 
 if __name__ == '__main__':
     main()
