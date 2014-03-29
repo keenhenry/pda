@@ -1,4 +1,7 @@
-.PHONY: devinstall devuninstall test clean
+.PHONY: devinstall devuninstall test clean lint
+
+lint:
+	pylint -rn pda/
 
 devinstall:
 	python setup.py develop
