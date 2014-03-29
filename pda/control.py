@@ -128,14 +128,15 @@ def controller(_db):
             _db.add_task(args.add, 
                          task_type=args.listname, 
                          milestone=_db.extend_milestone(args.time), 
-                         priority=_db.convert_int_prio_to_text_prio(args.priority))
+                         priority=_db.convert_prio_int_to_txt(args.priority))
         elif args.edit:
             if _db.has_task(args.edit):
-                _db.edit_task(args.edit, 
-                              new_summary=args.summary, 
-                              new_tasktype=args.listname,
-                              new_milestone=_db.extend_milestone(args.time),
-                              new_priority=_db.convert_int_prio_to_text_prio(args.priority))
+                _db.edit_task(
+                    args.edit, 
+                    new_summary=args.summary, 
+                    new_tasktype=args.listname,
+                    new_milestone=_db.extend_milestone(args.time),
+                    new_priority=_db.convert_prio_int_to_txt(args.priority))
             else:
                 cry_msg(p.prog, 
                         err_str='error: ', 
@@ -145,7 +146,7 @@ def controller(_db):
         else: # print out contents stored in lists
             _db.read_tasks(args.listname, 
                            _db.extend_milestone(args.time), 
-                           _db.convert_int_prio_to_text_prio(args.priority))
+                           _db.convert_prio_int_to_txt(args.priority))
 
 def main():
     """``pda`` entry point

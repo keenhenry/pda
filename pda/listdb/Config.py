@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
 """
-``Config`` module holds all the configuration related implementations used in ``listdb`` package.
+``Config`` module holds all the configuration-related implementations 
+used in ``listdb`` package.
 
 """
 
 import ConfigParser
 import os
-from pda import utils
+from ..utils import die_msg
 
 class PdaConfig(object):
     """
@@ -28,10 +29,11 @@ class PdaConfig(object):
         try:
             # load configurations from several possible locations
             self.__config = ConfigParser.RawConfigParser(self.DEFAULTS)
-            self.__config.read(['./.pdaconfig', os.path.expanduser('~/.pdaconfig')])
+            self.__config.read(['./.pdaconfig', \
+                                os.path.expanduser('~/.pdaconfig')])
         except ConfigParser.ParsingError, err:
             # crash pda when configuration file is ill-formatted
-            utils.die_msg('pda', msg=err)
+            die_msg('pda', msg=err)
 
     @property
     def local_db_path(self):
@@ -40,7 +42,8 @@ class PdaConfig(object):
 
         try:
             path = self.__config.get('pda', 'database-path')
-        except ConfigParser.NoSectionError or ConfigParser.DuplicateSectionError:
+        except ConfigParser.NoSectionError or \
+               ConfigParser.DuplicateSectionError:
             path = self.DEFAULTS['database-path']
 
         return path if path != "" else self.DEFAULTS['database-path']
@@ -52,7 +55,8 @@ class PdaConfig(object):
 
         try:
             name = self.__config.get('github', 'username')
-        except ConfigParser.NoSectionError or ConfigParser.DuplicateSectionError:
+        except ConfigParser.NoSectionError or \
+               ConfigParser.DuplicateSectionError:
             name = self.DEFAULTS['username']
 
         return name if name != "" else self.DEFAULTS['username']
@@ -64,7 +68,8 @@ class PdaConfig(object):
 
         try:
             name = self.__config.get('github', 'repo-name')
-        except ConfigParser.NoSectionError or ConfigParser.DuplicateSectionError:
+        except ConfigParser.NoSectionError or \
+               ConfigParser.DuplicateSectionError:
             name = self.DEFAULTS['repo-name']
 
         return name if name != "" else self.DEFAULTS['repo-name']
@@ -75,7 +80,8 @@ class PdaConfig(object):
         :param new_reponame: string
         """
 
-        assert new_reponame is not None and isinstance(new_reponame, str), new_reponame
+        assert new_reponame is not None and \
+               isinstance(new_reponame, str), new_reponame
 
         if self.remote_mode:
             self.__config.set('github', 'repo-name', new_reponame)
@@ -87,7 +93,8 @@ class PdaConfig(object):
 
         try:
             token = self.__config.get('github', 'auth-token')
-        except ConfigParser.NoSectionError or ConfigParser.DuplicateSectionError:
+        except ConfigParser.NoSectionError or \
+               ConfigParser.DuplicateSectionError:
             token = self.DEFAULTS['auth-token']
 
         return token if token != "" else self.DEFAULTS['auth-token']

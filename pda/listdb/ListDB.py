@@ -11,7 +11,7 @@ import shelve
 import requests
 import json
 
-from ..utils import die_msg, print_header
+from ..utils import die_msg, print_header, PROG_NAME
 from .Config import PdaConfig
 
 class GithubIssues(object):
@@ -210,9 +210,8 @@ class GithubIssues(object):
             if rep.status_code == requests.codes.created:
                 labels.append(name)
             else:
-                # TODO: should not hard-coded 'pda' to first argument
                 # make it a variable in utils module
-                die_msg('pda', 'label created failed: ' + name)
+                die_msg(PROG_NAME, 'label created failed: ' + name)
 
     def _update_labels(self, cmd):
         """
@@ -248,7 +247,7 @@ class GithubIssues(object):
             if issue_prio and issue_prio not in labels:
                 labels.append(issue_prio)
         else:
-            die_msg('pda', \
+            die_msg(PROG_NAME, \
                     'failed to retrive labels for current issue: '+str(issue_number))
 
         return labels
@@ -287,7 +286,7 @@ class GithubIssues(object):
                         milestone_number = milestone['number']
                         break
             else:
-                die_msg('pda', 'retrieving milestone failed')
+                die_msg(PROG_NAME, 'retrieving milestone failed')
 
         # milestone not created yet, create one
         if milestone_title and not milestone_number:
@@ -298,7 +297,7 @@ class GithubIssues(object):
             if resp.status_code == requests.codes.created:
                 milestone_number = resp.json()['number']
             else:
-                die_msg('pda', 'create milestone failed')
+                die_msg(PROG_NAME, 'create milestone failed')
 
         return milestone_number
 
@@ -338,7 +337,7 @@ class GithubIssues(object):
             url += '/'+str(cmd['#']) 
             self._get_payload_for_add_or_edit(cmd, payload)
         else: # should never reach here!
-            die_msg('pda', 'CMD type unknown in command history')
+            die_msg(PROG_NAME, 'CMD type unknown in command history')
 
         return url, payload
 
@@ -355,13 +354,19 @@ class GithubIssues(object):
         url, payload = self._prepare_method_url_and_payload(cmd)
 
         if cmd['CMD'] == 'ADD':
-            resp = requests.post(url=url, data=json.dumps(payload), auth=self.auth)
+            resp = requests.post(url=url, 
+                                 data=json.dumps(payload), 
+                                 auth=self.auth)
             success = (resp.status_code == requests.codes.created)
         elif cmd['CMD'] == 'EDIT':
-            resp = requests.patch(url=url, data=json.dumps(payload), auth=self.auth)
+            resp = requests.patch(url=url, 
+                                  data=json.dumps(payload), 
+                                  auth=self.auth)
             success = (resp.status_code == requests.codes.ok)
         else: # REMOVE
-            resp = requests.patch(url=url, data=json.dumps(payload), auth=self.auth)
+            resp = requests.patch(url=url, 
+                                  data=json.dumps(payload), 
+                                  auth=self.auth)
             success = (resp.status_code == requests.codes.ok)
 
         return success
@@ -400,7 +405,7 @@ class GithubIssues(object):
                 'y': 'year'}.get(milestone, None) if milestone else None
 
     @classmethod
-    def convert_int_prio_to_text_prio(cls, priority):
+    def convert_prio_int_to_txt(cls, priority):
         """
         :param priority: integer
         :rtype: string
@@ -413,7 +418,8 @@ class GithubIssues(object):
                 cls.MUSTDO:            'must',
                 cls.HIGH_IMPORTANCE:   'high',
                 cls.MEDIUM_IMPORTANCE: 'medium',
-                cls.LOW_IMPORTANCE:    'low'}.get(priority, None) if priority else None
+                cls.LOW_IMPORTANCE:    'low'}.get(priority, None) if priority \
+                                                                  else None
 
     def has_task(self, task_number):
         """
@@ -449,7 +455,9 @@ class GithubIssues(object):
         """
 
         # retrieving OPEN issues from Github Issues
-        resp = requests.get(self.url_issues, params={'state': 'open'}, auth=self.auth)
+        resp = requests.get(self.url_issues, 
+                            params={'state': 'open'}, 
+                            auth=self.auth)
 
         if resp.status_code == requests.codes.ok:
             # write issue data into local db store
@@ -472,7 +480,7 @@ class GithubIssues(object):
             # sync to local store
             self.shelf.sync()
         else:
-            die_msg('pda', 'syncing to local store failed')
+            die_msg(PROG_NAME, 'syncing to local store failed')
 
     def sync_remote_dbstore(self):
         """method to sync tasks from local data store with **Github Issues**
@@ -482,7 +490,7 @@ class GithubIssues(object):
         for cmd in self.shelf['CMDS_HISTORY']:
             _ok = self._exec_cmd_on_remote(cmd)
             if not _ok:
-                die_msg('pda', 'syncing remote failed')
+                die_msg(PROG_NAME, 'syncing remote failed')
 
         # remove local data store after syncing data to remote
         os.remove(self.local_dbpath)
@@ -500,7 +508,8 @@ class GithubIssues(object):
             del self.shelf[str(task_number)]
 
             # record remove operation in list 'CMDS_HISTORY' in local store
-            if self.remote_mode and not self._is_cmd_history_annihilable(task_number):
+            if self.remote_mode and not \
+               self._is_cmd_history_annihilable(task_number):
                 cmd_history_data = { 'CMD': 'REMOVE', '#': task_number }
                 self.shelf['CMDS_HISTORY'].append(cmd_history_data)
 
@@ -527,7 +536,8 @@ class GithubIssues(object):
                       "priority" : priority
                      }
 
-        # the value of the key for local store is not important, as long as it is unique
+        # the value of the key for local store is not important, 
+        # as long as it is unique
         max_task_number = self.max_task_number + 1
         self.shelf[str(max_task_number)] = issue_data
 
@@ -558,11 +568,16 @@ class GithubIssues(object):
         :param new_priority : None or string
         """
 
-        assert task_number   is not None and isinstance(task_number, (int, long)), task_number
-        assert new_summary   is None or isinstance(new_summary,   str), new_summary
-        assert new_tasktype  is None or isinstance(new_tasktype,  str), new_tasktype
-        assert new_milestone is None or isinstance(new_milestone, str), new_milestone
-        assert new_priority  is None or isinstance(new_priority,  str), new_priority
+        assert task_number   is not None and \
+               isinstance(task_number, (int, long)), task_number
+        assert new_summary   is None or \
+               isinstance(new_summary,   str), new_summary
+        assert new_tasktype  is None or \
+               isinstance(new_tasktype,  str), new_tasktype
+        assert new_milestone is None or \
+               isinstance(new_milestone, str), new_milestone
+        assert new_priority  is None or \
+               isinstance(new_priority,  str), new_priority
 
         if self.has_task(task_number):
             if new_summary: 
