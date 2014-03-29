@@ -2,7 +2,7 @@
 pda.utils
 ~~~~~~~~~
 
-This module provides utility functions that are used within pda and 
+This module provides utility functions that are used by ``pda`` and 
 also useful for external consumption, for example, unit tests.
 
 """

@@ -15,7 +15,7 @@ from ..utils import die_msg, print_header, PROG_NAME
 from .Config import PdaConfig
 
 class GithubIssues(object):
-    """A class representing one list database abstraction for pda.
+    """A class representing one list database abstraction for ``pda``.
 
     ``GithubIssues`` always stores data locally in a permanent data store 
     abstracted by python ``shelve``. And depends on the configuration, data 
@@ -144,7 +144,7 @@ class GithubIssues(object):
                (priority  is None or priority  == priority_in_shelf)
 
     def _is_cmd_history_annihilable(self, task_number):
-        """
+        """check if command history stack shrinked by REMOVE command
         :param task_number: integer
         :rtype: True or False
         """
@@ -162,7 +162,7 @@ class GithubIssues(object):
                                 new_tasktype, 
                                 new_milestone,
                                 new_priority):
-        """
+        """check if issues added by ADD commands also get 'EDIT'ed
         :param task_number: integer
         :param new_summary: None or string
         :param new_tasktype: None or string
@@ -192,7 +192,7 @@ class GithubIssues(object):
         return is_added_issue_updated
 
     def _get_one_label(self, name, color, labels):
-        """
+        """fetch one **Github Issues** label; create one if not exists
         :param name: string
         :param color: string
         :param labels: list of strings 
@@ -210,11 +210,10 @@ class GithubIssues(object):
             if rep.status_code == requests.codes.created:
                 labels.append(name)
             else:
-                # make it a variable in utils module
                 die_msg(PROG_NAME, 'label created failed: ' + name)
 
     def _update_labels(self, cmd):
-        """
+        """update **Github Issues** based on the information given by `cmd`
         :param cmd: dict
         :rtype: list of strings
         """
@@ -253,7 +252,7 @@ class GithubIssues(object):
         return labels
 
     def _get_labels(self, cmd):
-        """
+        """fetch **priority** and **type** labels
         :param cmd: dict
         :rtype: list of strings
         """
@@ -269,7 +268,9 @@ class GithubIssues(object):
         return labels
 
     def _get_milestone_number(self, cmd):
-        """
+        """fetch milestone id; if milestone not exists yet, 
+           create one and return the id of the created milestone.
+
         :param cmd: dict
         :rtype: integer or None
         """
@@ -302,7 +303,7 @@ class GithubIssues(object):
         return milestone_number
 
     def _get_payload_for_add_or_edit(self, cmd, payload):
-        """
+        """fill in payload used for HTTPS request to **Github Issues**
         :param cmd: dict
         :param payload: dict
         """
@@ -321,7 +322,7 @@ class GithubIssues(object):
             payload['labels'] = labels
 
     def _prepare_method_url_and_payload(self, cmd):
-        """
+        """contruct HTTP requests/query to **Github Issues**
         :param cmd: dict
         :rtype: tuple of (str, dict)
         """
@@ -342,7 +343,7 @@ class GithubIssues(object):
         return url, payload
 
     def _exec_cmd_on_remote(self, cmd):
-        """
+        """send HTTPS requests to **Github Issues** API
         :param cmd: dict
         :rtype: True or False
         """
@@ -389,7 +390,7 @@ class GithubIssues(object):
 
     @staticmethod
     def extend_milestone(milestone):
-        """
+        """complete milestone name based on abbreviated milestone names
         :param milestone: string
         :rtype: string
         """
@@ -406,7 +407,7 @@ class GithubIssues(object):
 
     @classmethod
     def convert_prio_int_to_txt(cls, priority):
-        """
+        """map integer priority to its text equivalent
         :param priority: integer
         :rtype: string
         """
@@ -422,7 +423,9 @@ class GithubIssues(object):
                                                                   else None
 
     def has_task(self, task_number):
-        """
+        """method checking if a task with task_number already exists 
+           in local data store.
+
         :param task_number: integer
         :rtype: True or False
         """
@@ -432,7 +435,7 @@ class GithubIssues(object):
         return self.shelf.has_key(str(task_number))
 
     def get_task_prio_and_type(self, task):
-        """
+        """fetch task priority and type 
         :param task: dict
         :rtype: tuple
         """
@@ -496,7 +499,7 @@ class GithubIssues(object):
         os.remove(self.local_dbpath)
         
     def remove_task(self, task_number):
-        """
+        """method to remove a task in local data store
         :param task_number: integer
         """
 
@@ -606,7 +609,9 @@ class GithubIssues(object):
             self.shelf.sync()
 
     def read_tasks(self, task_type=None, milestone=None, priority=None):
-        """
+        """method to output tasks in pretty format to STDOUT based on selected
+           attributes of tasks.
+
         :param task_type: None or string
         :param milestone: None or string
         :param priority : None or string

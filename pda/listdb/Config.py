@@ -8,12 +8,12 @@ used in ``listdb`` package.
 
 import ConfigParser
 import os
-from ..utils import die_msg
+from ..utils import die_msg, PROG_NAME
 
 class PdaConfig(object):
     """
-    ``PdaConfig`` is a class which implements configuration abstraction for ``ListDB`` 
-    class in ``GithubIssues`` module.
+    ``PdaConfig`` is a class which implements configuration abstraction 
+    for ``ListDB`` class in ``GithubIssues`` module.
 
     """
 
@@ -33,7 +33,7 @@ class PdaConfig(object):
                                 os.path.expanduser('~/.pdaconfig')])
         except ConfigParser.ParsingError, err:
             # crash pda when configuration file is ill-formatted
-            die_msg('pda', msg=err)
+            die_msg(PROG_NAME, msg=err)
 
     @property
     def local_db_path(self):
