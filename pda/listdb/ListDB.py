@@ -45,8 +45,6 @@ class GithubIssues(object):
         :param config: :class: `PdaConfig <PdaConfig>` object.
         """
 
-        assert config is not None and isinstance(config, PdaConfig), config
-
         # initialize instance attributes based on the loaded configuration
         self.__shelf = shelve.open(os.path.abspath(config.local_db_path), 
                                    protocol=-1,
@@ -308,8 +306,6 @@ class GithubIssues(object):
         :param payload: dict
         """
 
-        assert payload is not None and isinstance(payload, dict), payload
-
         milestone_number = self._get_milestone_number(cmd) 
         labels           = self._get_labels(cmd) if cmd['CMD'] == 'ADD' \
                                                  else self._update_labels(cmd)
@@ -347,8 +343,6 @@ class GithubIssues(object):
         :param cmd: dict
         :rtype: True or False
         """
-
-        assert cmd is not None and isinstance(cmd, dict), cmd
 
         success = False
 
@@ -395,8 +389,6 @@ class GithubIssues(object):
         :rtype: string
         """
 
-        assert milestone is None or isinstance(milestone, str), milestone
-
         # dictionary-based 'switch' statement
         # None is default if milestone is not found
         return {'d': 'day',
@@ -411,7 +403,6 @@ class GithubIssues(object):
         :param priority: integer
         :rtype: string
         """
-        assert priority is None or isinstance(priority, int), priority
 
         # dictionary-based 'switch' statement
         # None is default if priority is not found
@@ -430,8 +421,6 @@ class GithubIssues(object):
         :rtype: True or False
         """
 
-        assert isinstance(task_number, (int, long)), task_number
-
         return self.shelf.has_key(str(task_number))
 
     def get_task_prio_and_type(self, task):
@@ -439,8 +428,6 @@ class GithubIssues(object):
         :param task: dict
         :rtype: tuple
         """
-
-        assert task is not None and isinstance(task, dict), task
 
         prio, task_type = None, None
 
@@ -503,8 +490,6 @@ class GithubIssues(object):
         :param task_number: integer
         """
 
-        assert isinstance(task_number, (int, long)), task_number
-
         if self.has_task(task_number):
 
             # delete task at local store
@@ -526,11 +511,6 @@ class GithubIssues(object):
         :param priority: None or string
         :rtype: integer
         """
-
-        assert summary   is not None and isinstance(summary,   str), summary
-        assert task_type is None or isinstance(task_type, str), task_type
-        assert milestone is None or isinstance(milestone, str), milestone
-        assert priority  is None or isinstance(priority,  str), priority
 
         issue_data = {
                       "summary"  : summary,
@@ -571,17 +551,6 @@ class GithubIssues(object):
         :param new_priority : None or string
         """
 
-        assert task_number   is not None and \
-               isinstance(task_number, (int, long)), task_number
-        assert new_summary   is None or \
-               isinstance(new_summary,   str), new_summary
-        assert new_tasktype  is None or \
-               isinstance(new_tasktype,  str), new_tasktype
-        assert new_milestone is None or \
-               isinstance(new_milestone, str), new_milestone
-        assert new_priority  is None or \
-               isinstance(new_priority,  str), new_priority
-
         if self.has_task(task_number):
             if new_summary: 
                 self.shelf[str(task_number)]["summary"] = new_summary
@@ -616,10 +585,6 @@ class GithubIssues(object):
         :param milestone: None or string
         :param priority : None or string
         """
-
-        assert task_type is None or isinstance(task_type, str), task_type
-        assert milestone is None or isinstance(milestone, str), milestone
-        assert priority  is None or isinstance(priority,  str), priority
 
         print_header()
         for key in self.shelf:

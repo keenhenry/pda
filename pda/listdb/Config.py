@@ -80,9 +80,6 @@ class PdaConfig(object):
         :param new_reponame: string
         """
 
-        assert new_reponame is not None and \
-               isinstance(new_reponame, str), new_reponame
-
         if self.remote_mode:
             self.__config.set('github', 'repo-name', new_reponame)
 
