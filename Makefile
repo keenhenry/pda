@@ -2,7 +2,7 @@
 
 upload:
 	python setup.py sdist bdist_wheel
-	twine upload dist/*
+	twine upload -r pypi dist/*
 
 lint:
 	! pylint -rn pda/ 	# make `make` ignore error return code
@@ -24,4 +24,5 @@ clean: devuninstall
 	rm *egg/ -rf
 	rm *egg-info/ -rf
 	rm dist/ -rf
+	rm build/ -rf
 	find . -iname .tox -prune -o -iname '*.py[cod]' -print | xargs rm -rf
