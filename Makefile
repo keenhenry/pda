@@ -1,4 +1,4 @@
-.PHONY: devinstall devuninstall test clean lint
+.PHONY: upload lint devinstall devuninstall test clean
 
 upload:
 	python setup.py sdist bdist_wheel
