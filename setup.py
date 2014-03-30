@@ -35,6 +35,8 @@ classifiers=[ 'Development Status :: 3 - Alpha',
               'License :: OSI Approved :: BSD License',
               'Intended Audience :: End Users/Desktop',
               'Operating System :: OS Independent',
-              'Programming Language :: Python :: 2' ],
+              'Programming Language :: Python',
+              'Programming Language :: Python :: 2.6',
+              'Programming Language :: Python :: 2.7' ],
 **extra_kwargs
 )
