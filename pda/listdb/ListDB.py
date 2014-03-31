@@ -375,7 +375,7 @@ class GithubIssues(object):
         """
 
         if self._is_selected(task_number, task_type, milestone, priority):
-            print u'{:<5}  {:<60}  {:<9}  {:<8}  {:<8}'.format(
+            print u'{0:<5}  {1:<60}  {2:<9}  {3:<8}  {4:<8}'.format(
                   task_number, 
                   self.shelf[task_number]["summary"], 
                   self.shelf[task_number]["type"], 

@@ -20,9 +20,9 @@ def print_header():
     headers = ['TASK#', 'SUMMARY', 'LIST TYPE', 'DUE TIME', 'PRIORITY']
 
     print
-    print '{:<5}  {:<60}  {:<9}  {:<8}  {:<8}'.format(*headers)
-    print '{:=<5}  {:=<60}  {:=<9}  {:=<8}  {:=<8}'.format(*['', '', \
-                                                             '', '', ''])
+    print '{0:<5}  {1:<60}  {2:<9}  {3:<8}  {4:<8}'.format(*headers)
+    print '{0:=<5}  {1:=<60}  {2:=<9}  {3:=<8}  {4:=<8}'.format(*['', '', '', \
+                                                                  '', ''])
 
 def cry_msg(prog, err_str="", msg=""):
     """Emit error messages for pda
@@ -30,7 +30,7 @@ def cry_msg(prog, err_str="", msg=""):
     :param err_str: string
     :param msg:     string
     """
-    print '{}: {}{}'.format(prog, err_str, msg)
+    print '{0}: {1}{2}'.format(prog, err_str, msg)
 
 def die_msg(prog, msg=''):
     """Crash pda with an error message -> used for more fatal errors
@@ -39,5 +39,5 @@ def die_msg(prog, msg=''):
     :param msg:     string
     """
 
-    print '{}: error: {}'.format(prog, msg)
+    print '{0}: error: {1}'.format(prog, msg)
     sys.exit(1)
