@@ -121,8 +121,14 @@ class GithubIssues(object):
         """current maximum task number in local shelve data store
         :rtype: integer
         """
-        return max(int(task_no) for task_no in self.shelf \
-                                 if task_no != 'CMDS_HISTORY')
+
+        max_task_num = 0
+
+        if self.shelf:
+            max_task_num = max(int(task_no) for task_no in self.shelf \
+                                             if task_no != 'CMDS_HISTORY')
+
+        return max_task_num
 
     def _is_selected(self, task_no, task_type, milestone, priority):
         """method to check if current task is selected for output printing
@@ -476,11 +482,13 @@ class GithubIssues(object):
         """method to sync tasks from local data store with **Github Issues**
         """
 
-        # syncing data to remote (Github Issues)
-        for cmd in self.shelf['CMDS_HISTORY']:
-            _ok = self._exec_cmd_on_remote(cmd)
-            if not _ok:
-                die_msg(PROG_NAME, 'syncing remote failed')
+        if self.shelf.has_key('CMDS_HISTORY'):
+
+            # syncing data to remote (Github Issues)
+            for cmd in self.shelf['CMDS_HISTORY']:
+                _ok = self._exec_cmd_on_remote(cmd)
+                if not _ok:
+                    die_msg(PROG_NAME, 'syncing remote failed')
 
         # remove local data store after syncing data to remote
         os.remove(self.local_dbpath)
