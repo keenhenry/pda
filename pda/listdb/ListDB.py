@@ -12,7 +12,6 @@ import requests
 import json
 
 from ..utils import die_msg, print_header, PROG_NAME
-from .Config import PdaConfig
 
 class GithubIssues(object):
     """A class representing one list database abstraction for ``pda``.
