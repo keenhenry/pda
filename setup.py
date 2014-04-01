@@ -5,7 +5,9 @@ from setuptools import setup, find_packages
 from pda import __version__
 
 with open('README.rst') as f:
-    long_description = f.read()
+    readme = f.read()
+with open('HISTORY.rst') as f:
+    history = f.read()
 
 extra_kwargs = {}
 extra_kwargs['test_suite']       = 'test_pda'
@@ -26,7 +28,7 @@ entry_points={
 # metadata
 author="Henry Huang",
 description='A command line tool managing all sorts of TODO lists',
-long_description=long_description,
+long_description=readme + '\n\n' + history,
 license='BSD',
 url='https://github.com/keenhenry/pda',
 platforms=['any'],

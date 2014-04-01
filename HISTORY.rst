@@ -1,6 +1,12 @@
 Release History
 ---------------
 
+0.1.3 (2014-04-01)
+++++++++++++++++++
+
+* Fixed sync_remote_dbstore method bug for transition between local mode and remote mode.
+* Fixed max_task_number attribute getter for shelve is empty.
+
 0.1.2 (2014-03-31)
 ++++++++++++++++++
 
