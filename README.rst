@@ -21,7 +21,7 @@ accessed through ``pda`` command line interface, which is explained below:
 
 
 CREATE tasks
-^^^^^^^^^^^^
+++++++++++++
 
 ::
 
@@ -38,7 +38,7 @@ CREATE tasks
 
 
 UPDATE tasks
-^^^^^^^^^^^^
+++++++++++++
 
 ::
 
@@ -59,7 +59,7 @@ UPDATE tasks
 
 
 QUERY lists
-^^^^^^^^^^^
++++++++++++
 
 ::
 
