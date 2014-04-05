@@ -3,6 +3,11 @@
 Release History
 ---------------
 
+0.1.6 (2014-04-05)
+++++++++++++++++++
+
+* Refined README.rst to provide instructions for ``.pdaconfig`` file.
+
 0.1.5 (2014-04-04)
 ++++++++++++++++++
 
