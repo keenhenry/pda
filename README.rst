@@ -23,13 +23,13 @@ Synopsis
 --------
 
 List names can be any string you want, personally I have **todo**, **tolearn** and **toread**
-as available list names. List data is always stored locally. And, depends on the configuration 
-setting in your configuration file (``~/.pdaconfig``), list data can also be synced to 
+as available list names. List data is always stored locally. And, depends on the `Configuration 
+Setting`_ in your configuration file (``~/.pdaconfig``), list data can also be synced to 
 `Github Issue <http://bit.ly/18YAS2p>`_ and accessed through ``pda``; that is how you 
 make your todo list(s) portable via web interface.
 
-If no configuration file is provided, ``pda`` assumes it is to be used in local mode; in other 
-words, list data only stored locally.
+If no configuration file is provided, ``pda`` assumes it is to be used only locally; in other 
+words, no data will be put on **Github Issues**.
 
 For more detailed usage:
 
@@ -52,6 +52,9 @@ this command will automatically create such list in database. See example below:
     # 
     # <-p> specifies the priority of this task
     #      allowed values are => 1 (low), 2 (medium), 3 (high), 4 (must), 5 (urgmust)
+    #
+    # For example: add a 'wash dishes' task with due time current 'day' and 
+    #              priority 'must' in 'todo' list
 
     $ pda -a 'wash dishes' -t d -p 4 todo
 
@@ -70,6 +73,8 @@ in list will stay unchanged.
     # $ pda -r <N> 
     #
     # ===> delete a task numbered <N>
+    #
+    # For example: remove a task with task number 5 
 
     $ pda -r 5
 
@@ -88,6 +93,9 @@ in list will stay unchanged.
     #      allowed values are => 1 (low), 2 (medium), 3 (high), 4 (must), 5 (urgmust)
     #
     # <lisname> specifies the NEW list this task belongs to
+    #
+    # For example: edit/update a task number 3 with a new task summary 
+    #              'vacuum floor this week' and its due time to current week
 
     $ pda -e 3 -s 'vacuum floor this week' -t w
 
@@ -125,3 +133,36 @@ have priority **high** and belongs to the list named **toread**:
 .. code-block:: bash
 
     $ pda -tw -p3 toread
+
+
+Configuration Setting
+---------------------
+
+``pda`` can be configured by a configuration file named ``.pdaconfig`` reside in your 
+home directory. If no such file is present, then ``pda`` simply use some *default settings*
+internally, and behave only in **local mode**; meaning data is only stored locally.
+
+To make ``pda`` operate in **remote mode** (meaning the data is stored both locally and 
+remotely on **Github Issues**), you need to set several parameters in the configuration file.
+
+See an example configuration file below:
+
+.. code-block:: cfg
+
+    # a typical configuration file contains two sections: [pda] and [github]
+
+    [pda]
+    ; the local database where pda will store its data
+    database-path = /tmp/.pdastore
+
+    [github]
+    ; username on github
+    username   = your_github_username
+
+    ; the name of the repository where you want to store your list data
+    repo-name  = your_github_reponame
+
+    ; authentication token for a Github application which pda will use
+    ; to communitcate with Github Issues API, see link below:
+    ; https://help.github.com/articles/creating-an-access-token-for-command-line-use
+    auth-token = your_github_app_token
