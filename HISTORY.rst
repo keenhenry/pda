@@ -3,6 +3,11 @@
 Release History
 ---------------
 
+0.1.7 (2014-04-08)
+++++++++++++++++++
+
+* Completed syncing data section in README.rst.
+
 0.1.6 (2014-04-05)
 ++++++++++++++++++
 

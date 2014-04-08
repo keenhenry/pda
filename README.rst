@@ -64,7 +64,7 @@ UPDATE tasks
 
 All the attributes of a task can be changed to the specified values in the options. If
 a value with an option is not specified in the command, then the corresponding attribute 
-in list will stay unchanged.
+of that task will stay unchanged.
 
 .. code-block:: bash
 
@@ -133,6 +133,27 @@ have priority **high** and belongs to the list named **toread**:
 .. code-block:: bash
 
     $ pda -tw -p3 toread
+
+
+Syncing Data With Github Issues
++++++++++++++++++++++++++++++++
+
+When ``pda`` is in **remote mode**, it can communicate with **Github Issues** to 
+upload/download list data.
+
+Once ``pda`` is in remote mode, you can only start using ``pda`` by downloading data 
+from **Github Issues** to local data store first:
+
+.. code-block:: bash
+
+    $ pda --start
+
+Once you have finished using ``pda`` and want to upload all the data created during 
+current *section* (between ``--start`` and ``--stop``) to **Github Issues**, try:
+
+.. code-block:: bash
+
+    $ pda --stop
 
 
 Configuration Setting
