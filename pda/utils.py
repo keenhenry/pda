@@ -8,11 +8,57 @@ also useful for external consumption, for example, unit tests.
 """
 
 import sys
+from operator import itemgetter
 
 PROG_NAME = 'pda'
 
+def ord_prio(prio):
+    """Compute the ordinal number of a text priority
+    :param prio: string
+    :rtype: integer
+    """
+
+    return { 'urgmust': 1,
+             'must'   : 2,
+             'high'   : 3,
+             'medium' : 4,
+             'low'    : 5 }.get(prio, 5)
+
+def ord_time(time):
+    """Compute the ordinal number of a text milestone
+    :param prio: string
+    :rtype: integer
+    """
+
+    return { 'day'    : 1,
+             'week'   : 2,
+             'month'  : 3,
+             'season' : 4,
+             'year'   : 5 }.get(time, 5)
+
+def sorted_tasks(shelf):
+    """Sort tasks stored locally and return the sorted list
+    :param shelf: :class: `shelve <shelve>` object
+    :rtype: a list of strings
+    """
+
+    # create a list of tuples which will be used for sorting
+    task_tuples = [(key,                               \
+                    ord_time(shelf[key]['milestone']), \
+                    ord_prio(shelf[key]['priority']),  \
+                    shelf[key]['type']) for key in shelf \
+                                         if key != 'CMDS_HISTORY']
+
+    # multiple levels of sorting based on the milestone (2nd element),
+    # then priority (3rd element), then alphabetical order of list types
+    # (4th element), and finally by task number (1st element) in the tuples
+    sorted_tuples = sorted(task_tuples, key=itemgetter(1, 2, 3, 0))
+
+    # return a list of sorted task numbers
+    return [tup[0] for tup in sorted_tuples]
+
 def print_header():
-    """print pretty header of list content
+    """Print pretty header of list content
 
     The head contains 5 columns, each column has a differnt string length.
     """

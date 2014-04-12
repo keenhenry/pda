@@ -11,7 +11,7 @@ import shelve
 import requests
 import json
 
-from ..utils import die_msg, print_header, PROG_NAME
+from ..utils import die_msg, print_header, sorted_tasks, PROG_NAME
 
 class GithubIssues(object):
     """A class representing one list database abstraction for ``pda``.
@@ -594,6 +594,5 @@ class GithubIssues(object):
         """
 
         print_header()
-        for key in self.shelf:
-            if key != 'CMDS_HISTORY':
-                self._print_task(key, task_type, milestone, priority)
+        for task_no in sorted_tasks(self.shelf):
+            self._print_task(task_no, task_type, milestone, priority)
