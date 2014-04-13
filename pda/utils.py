@@ -43,7 +43,7 @@ def sorted_tasks(shelf):
     """
 
     # create a list of tuples which will be used for sorting
-    task_tuples = [(key,                               \
+    task_tuples = [(int(key),                          \
                     ord_time(shelf[key]['milestone']), \
                     ord_prio(shelf[key]['priority']),  \
                     shelf[key]['type']) for key in shelf \
@@ -55,7 +55,7 @@ def sorted_tasks(shelf):
     sorted_tuples = sorted(task_tuples, key=itemgetter(1, 2, 3, 0))
 
     # return a list of sorted task numbers
-    return [tup[0] for tup in sorted_tuples]
+    return [str(tup[0]) for tup in sorted_tuples]
 
 def print_header():
     """Print pretty header of list content
