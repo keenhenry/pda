@@ -3,6 +3,13 @@
 Release History
 ---------------
 
+0.1.8 (2014-04-26)
+++++++++++++++++++
+
+* Improved configuration module for runtime usage.
+* Sorted ``pda`` output based on DUE TIME, PRIORITY, LIST TYPE and TASK#.
+
+
 0.1.7 (2014-04-08)
 ++++++++++++++++++
 
