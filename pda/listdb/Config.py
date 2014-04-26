@@ -24,13 +24,20 @@ class PdaConfig(object):
         'auth-token'   : None
     }
 
-    def __init__(self):
+    def __init__(self, test_cfg=None):
+        """
+        :param test_cfg: :class: `file <file>` object or None
+        """
 
         try:
             # load configurations from several possible locations
             self.__config = ConfigParser.RawConfigParser(self.DEFAULTS)
-            self.__config.read(['./.pdaconfig', \
-                                os.path.expanduser('~/.pdaconfig')])
+
+            if not test_cfg:
+                self.__config.read([os.path.expanduser('~/.pdaconfig')])
+            else:
+                self.__config.readfp(test_cfg)
+
         except ConfigParser.ParsingError, err:
             # crash pda when configuration file is ill-formatted
             die_msg(PROG_NAME, msg=err)
@@ -73,15 +80,6 @@ class PdaConfig(object):
             name = self.DEFAULTS['repo-name']
 
         return name if name != "" else self.DEFAULTS['repo-name']
-
-    @reponame.setter
-    def reponame(self, new_reponame):
-        """reponame attribute setter
-        :param new_reponame: string
-        """
-
-        if self.remote_mode:
-            self.__config.set('github', 'repo-name', new_reponame)
 
     @property
     def authtoken(self):
