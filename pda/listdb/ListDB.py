@@ -32,13 +32,6 @@ class GithubIssues(object):
     RED    = 'e11d21'
     BLUE   = '0052cc'
     
-    # PRIORITY constants
-    URGENT_MUSTDO     = 5
-    MUSTDO            = 4
-    HIGH_IMPORTANCE   = 3
-    MEDIUM_IMPORTANCE = 2
-    LOW_IMPORTANCE    = 1
-
     def __init__(self, config):
         """
         :param config: :class: `PdaConfig <PdaConfig>` object.
@@ -401,22 +394,6 @@ class GithubIssues(object):
                 'm': 'month',
                 's': 'season',
                 'y': 'year'}.get(milestone, None) if milestone else None
-
-    @classmethod
-    def convert_prio_int_to_txt(cls, priority):
-        """map integer priority to its text equivalent
-        :param priority: integer
-        :rtype: string
-        """
-
-        # dictionary-based 'switch' statement
-        # None is default if priority is not found
-        return {cls.URGENT_MUSTDO:     'urgmust',
-                cls.MUSTDO:            'must',
-                cls.HIGH_IMPORTANCE:   'high',
-                cls.MEDIUM_IMPORTANCE: 'medium',
-                cls.LOW_IMPORTANCE:    'low'}.get(priority, None) if priority \
-                                                                  else None
 
     def has_task(self, task_number):
         """method checking if a task with task_number already exists 

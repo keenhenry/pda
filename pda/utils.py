@@ -10,7 +10,31 @@ also useful for external consumption, for example, unit tests.
 import sys
 from operator import itemgetter
 
+# program name
 PROG_NAME = 'pda'
+
+# priority symbolic constants
+URGENT_MUSTDO     = 5
+MUSTDO            = 4
+HIGH_IMPORTANCE   = 3
+MEDIUM_IMPORTANCE = 2
+LOW_IMPORTANCE    = 1
+
+
+def convert_prio_int_to_txt(priority):
+    """map integer priority to its text equivalent
+    :param priority: integer
+    :rtype: string
+    """
+
+    # dictionary-based 'switch' statement
+    # None is default if priority is not found
+    return {URGENT_MUSTDO:     'urgmust',
+            MUSTDO:            'must',
+            HIGH_IMPORTANCE:   'high',
+            MEDIUM_IMPORTANCE: 'medium',
+            LOW_IMPORTANCE:    'low'}.get(priority, None) if priority \
+                                                          else None
 
 def ord_prio(prio):
     """Compute the ordinal number of a text priority
