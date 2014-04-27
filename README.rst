@@ -68,6 +68,10 @@ of that task will stay unchanged.
 
 .. code-block:: bash
 
+    # ===> remove all the tasks stored in database
+
+    $ pda --clear
+
     # Command format:
     #
     # $ pda -r <N> 

@@ -3,12 +3,16 @@
 Release History
 ---------------
 
+0.1.9 (2014-04-27)
+++++++++++++++++++
+
+* Added ``--clear`` option to allow ``pda`` to remove all tasks stored.
+
 0.1.8 (2014-04-26)
 ++++++++++++++++++
 
 * Improved configuration module for runtime usage.
 * Sorted ``pda`` output based on DUE TIME, PRIORITY, LIST TYPE and TASK#.
-
 
 0.1.7 (2014-04-08)
 ++++++++++++++++++
