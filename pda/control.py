@@ -54,6 +54,11 @@ def controller(_db):
                    action="store_true",
                    help='stop pda and sync with remote')
 
+    # option to close all the tasks from todo list
+    p.add_argument('--clear',
+                   action="store_true",
+                   help='remove all the tasks in list')
+
     # option to close a task from todo list
     p.add_argument('-r', '--remove',
                    action="store",
@@ -117,7 +122,9 @@ def controller(_db):
             cry_msg(p.prog, 
                     msg='please execute "pda --start" first; and "pda --stop" before leaving pda')
     else:
-        if args.remove:
+        if args.clear:
+            _db.remove_all_tasks()
+        elif args.remove:
             if _db.has_task(args.remove):
                 _db.remove_task(args.remove)
             else:

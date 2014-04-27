@@ -117,8 +117,10 @@ class GithubIssues(object):
         max_task_num = 0
 
         if self.shelf:
-            max_task_num = max(int(task_no) for task_no in self.shelf \
-                                             if task_no != 'CMDS_HISTORY')
+            task_numbers = [int(task_no) for task_no in self.shelf \
+                                             if task_no != 'CMDS_HISTORY']
+            if task_numbers:
+                max_task_num = max(task_numbers)
 
         return max_task_num
 
@@ -486,6 +488,14 @@ class GithubIssues(object):
                 self.shelf['CMDS_HISTORY'].append(cmd_history_data)
 
             self.shelf.sync()
+
+    def remove_all_tasks(self):
+        """method to remove all the tasks in local data store
+        """
+
+        for key in self.shelf:
+            if key != 'CMDS_HISTORY':
+                self.remove_task(int(key))
 
     def add_task(self, summary, task_type=None, milestone=None, priority=None):
         """method to create one task in local data store

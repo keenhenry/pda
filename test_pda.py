@@ -126,6 +126,19 @@ database-path = /tmp/.pdateststore
         self.assertTrue(len(self.db.shelf) == 2)
         self.assertFalse(self.db.shelf.has_key('CMDS_HISTORY'))
 
+    def testRemoveAllTasks(self):
+
+        # initially the local data store should have 3 tasks
+        self.assertTrue(len(self.db.shelf) == 3)
+
+        # remove all tasks
+        self.db.remove_all_tasks()
+
+        # verified they are indeed removed
+        self.assertTrue(len(self.db.shelf) == 0)
+        self.assertFalse(self.db.shelf.has_key('CMDS_HISTORY'))
+        self.assertFalse(self.db.shelf.has_key(self.tl[0]))
+
     def testEditTask(self):
 
         # initially the local data store should have 3 tasks
@@ -250,10 +263,6 @@ class ListDBSyncingTests(unittest.TestCase):
 
         # finally test if local and remote contents are synced!
         self.assertTrue(local==remote)
-
-
-class pdaTests(unittest.TestCase):
-    pass
 
 
 def main():
