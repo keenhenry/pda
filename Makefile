@@ -15,8 +15,14 @@ devuninstall:
 	rm `which pda` -rf
 	rm pda.egg-info/ -rf
 
-test:
+devtest:
 	tox
+
+test:
+	tox -- \
+		test_pda.py:ConfigLocalModeTests  \
+		test_pda.py:ConfigRemoteModeTests \
+		test_pda.py:ListDBTests
 
 clean: devuninstall
 	rm MANIFEST -rf
