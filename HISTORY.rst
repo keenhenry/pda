@@ -3,6 +3,11 @@
 Release History
 ---------------
 
+0.1.9.1 (2014-07-06)
+++++++++++++++++++++
+
+* Remove installing ``unittest2``, since it's not used at all by ``pda``.
+
 0.1.9 (2014-04-27)
 ++++++++++++++++++
 
