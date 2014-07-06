@@ -6,10 +6,7 @@ import io
 from pda.listdb.ListDB import GithubIssues
 from pda.listdb.Config import PdaConfig
 
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
+import unittest
 
 
 class ConfigLocalModeTests(unittest.TestCase):

@@ -15,7 +15,6 @@ extra_kwargs['install_requires'] = ['requests']
 
 if sys.version_info < (2, 7):
     extra_kwargs['install_requires'].append('argparse>=1.2')
-    extra_kwargs['setup_requires'] = ['unittest2']
 
 setup(
 name="pda",
