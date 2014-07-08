@@ -1,8 +1,8 @@
-[![Build Status](https://travis-ci.org/keenhenry/pda.svg?branch=master)](https://travis-ci.org/keenhenry/pda)
-
 ================================
 Personal Desktop Assistant - pda
 ================================
+
+|buildstatus|_
 
 ``pda`` is a command line tool used to manage useful lists in your daily ife - such as TODO, 
 TOLEARN and TOREAD lists, etc. You can use it to create as many lists as you want.
@@ -193,3 +193,6 @@ See an example configuration file below:
     ; to communitcate with Github Issues API, see link below:
     ; https://help.github.com/articles/creating-an-access-token-for-command-line-use
     auth-token = your_github_app_token
+
+.. |buildstatus| image:: https://travis-ci.org/keenhenry/pda.svg?branch=master
+.. _buildstatus: https://travis-ci.org/keenhenry/pda
