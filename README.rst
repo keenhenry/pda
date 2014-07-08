@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/keenhenry/pda.svg?branch=master)](https://travis-ci.org/keenhenry/pda)
+
 ================================
 Personal Desktop Assistant - pda
 ================================
