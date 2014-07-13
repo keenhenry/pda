@@ -11,7 +11,7 @@ import shelve
 import requests
 import json
 
-from ..utils import die_msg, print_header, sorted_tasks, PROG_NAME
+from ..utils import cry_msg, die_msg, print_header, sorted_tasks, PROG_NAME
 
 class GithubIssues(object):
     """A class representing one list database abstraction for ``pda``.
@@ -488,6 +488,18 @@ class GithubIssues(object):
                 self.shelf['CMDS_HISTORY'].append(cmd_history_data)
 
             self.shelf.sync()
+        else:
+            cry_msg(PROG_NAME, 
+                    err_str='error: ', 
+                    msg='no such task (#'+str(task_number)+') in the list')
+
+    def finish_tasks(self, task_numbers):
+        """method to remove tasks specified in ``task_numbers``
+        :param task_numbers: list of integers
+        """
+
+        for t_id in task_numbers:
+            self.remove_task(t_id)
 
     def remove_all_tasks(self):
         """method to remove all the tasks in local data store

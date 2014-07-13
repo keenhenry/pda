@@ -3,10 +3,20 @@
 import requests
 import os
 import io
+import unittest
+
+from mock import patch
 from pda.listdb.ListDB import GithubIssues
 from pda.listdb.Config import PdaConfig
 
-import unittest
+
+class MockDevice():
+    """A mock device to temporarily suppress output to stdout
+
+    Similar to UNIX /dev/null.
+    """
+
+    def write(self, s): pass
 
 
 class ConfigLocalModeTests(unittest.TestCase):
@@ -118,9 +128,25 @@ database-path = /tmp/.pdateststore
         self.assertFalse(self.db.shelf.has_key(self.tl[0]))
         self.assertTrue(len(self.db.shelf) == 2)
 
-        # remove non-existing task
-        self.db.remove_task(-1)
+        # remove non-existing task (task id = -1) and suppress output of remove_task
+        with patch('sys.stdout', new=MockDevice()) as fake_out:
+            self.db.remove_task(-1)
+
         self.assertTrue(len(self.db.shelf) == 2)
+        self.assertFalse(self.db.shelf.has_key('CMDS_HISTORY'))
+
+    def testFinishTasks(self):
+
+        # initially the local data store should have 3 tasks
+        self.assertTrue(len(self.db.shelf) == 3)
+
+        # remove first two tasks
+        self.db.finish_tasks([int(self.tl[0]), int(self.tl[1])])
+        self.assertFalse(self.db.shelf.has_key(self.tl[0]))
+        self.assertFalse(self.db.shelf.has_key(self.tl[1]))
+        self.assertTrue(self.db.shelf.has_key(self.tl[2]))
+
+        self.assertTrue(len(self.db.shelf) == 1)
         self.assertFalse(self.db.shelf.has_key('CMDS_HISTORY'))
 
     def testRemoveAllTasks(self):

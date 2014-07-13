@@ -59,12 +59,13 @@ def controller(_db):
                    action="store_true",
                    help='remove all the tasks in list')
 
-    # option to close a task from todo list
-    p.add_argument('-r', '--remove',
+    # option to close tasks from todo list
+    p.add_argument('-f', '--finish',
                    action="store",
                    type=int,
+                   nargs='+',
                    metavar='N',
-                   help='remove task numbered N from list')
+                   help='remove tasks numbered N [N ...] from list')
 
     # option to add a task into todo list
     p.add_argument('-a', '--add',
@@ -124,13 +125,8 @@ def controller(_db):
     else:
         if args.clear:
             _db.remove_all_tasks()
-        elif args.remove:
-            if _db.has_task(args.remove):
-                _db.remove_task(args.remove)
-            else:
-                cry_msg(p.prog, 
-                        err_str='error: ', 
-                        msg='no such task (#'+str(args.remove)+') in the list')
+        elif args.finish:
+            _db.finish_tasks(args.finish)
         elif args.add:
             _db.add_task(args.add, 
                          task_type=args.listname, 

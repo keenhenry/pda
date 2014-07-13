@@ -174,19 +174,18 @@ FINISH tasks
 
 The best part of a todo list tool is you can remove a task after you finish it:
 
-``pda -r [task number]`` 
+``pda -f [list of task numbers]`` 
 
-Now, say I have already finished *wash dishes* task therefore I would like to delete
-it from my **todo** list:
+Now, say I have already finished *wash dishes* and *clean study room* tasks 
+therefore I would like to delete them from my **todo** list:
 
 .. code-block:: bash
 
-    $ pda -r 1
+    $ pda -f 1 2
     $ pda
 
     TASK#  SUMMARY                      LIST TYPE  DUE TIME  PRIORITY
     =====  ===========================  =========  ========  ========
-    2      clean study room             todo       day       urgmust 
     3      write a technical blog post  todo       day       high    
     4      read Free Fall               toread     season    high    
 

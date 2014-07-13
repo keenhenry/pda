@@ -11,6 +11,7 @@ with open('HISTORY.rst') as f:
 
 extra_kwargs = {}
 extra_kwargs['test_suite']       = 'test_pda'
+extra_kwargs['setup_requires']   = ['mock']
 extra_kwargs['install_requires'] = ['requests']
 
 if sys.version_info < (2, 7):
