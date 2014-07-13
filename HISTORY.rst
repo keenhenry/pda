@@ -3,6 +3,14 @@
 Release History
 ---------------
 
+0.2.1 (2014-07-13)
+++++++++++++++++++
+
+* Added --finish option; now ``pda`` is feature-complete.
+* Improved coding style for ``control.py`` by removing redundant if-else branches.
+* Updated tool description.
+* Improved unit test and test automation process.
+
 0.2.0 (2014-07-10)
 ++++++++++++++++++
 
