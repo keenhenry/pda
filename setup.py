@@ -26,7 +26,7 @@ entry_points={
 
 # metadata
 author="Henry Huang",
-description='A command line tool managing all sorts of TODO lists',
+description='A command line todo list manager',
 long_description=readme + '\n\n' + history,
 license='BSD',
 url='https://github.com/keenhenry/pda',
