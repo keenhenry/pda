@@ -582,6 +582,10 @@ class GithubIssues(object):
                                      'PRIORITY' : new_priority }
                 self.shelf['CMDS_HISTORY'].append(cmd_history_data)
             self.shelf.sync()
+        else:
+            cry_msg(PROG_NAME, 
+                    err_str='error: ', 
+                    msg='no such task (#'+str(task_number)+') in the list')
 
     def read_tasks(self, task_type=None, milestone=None, priority=None):
         """method to output tasks in pretty format to STDOUT based on selected

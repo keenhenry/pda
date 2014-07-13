@@ -133,17 +133,12 @@ def controller(_db):
                          milestone=_db.extend_milestone(args.time), 
                          priority=convert_prio_int_to_txt(args.priority))
         elif args.edit:
-            if _db.has_task(args.edit):
-                _db.edit_task(
-                    args.edit, 
-                    new_summary=args.summary, 
-                    new_tasktype=args.listname,
-                    new_milestone=_db.extend_milestone(args.time),
-                    new_priority=convert_prio_int_to_txt(args.priority))
-            else:
-                cry_msg(p.prog, 
-                        err_str='error: ', 
-                        msg='no such task (#'+str(args.edit)+') in the list')
+            _db.edit_task(
+                args.edit, 
+                new_summary=args.summary, 
+                new_tasktype=args.listname,
+                new_milestone=_db.extend_milestone(args.time),
+                new_priority=convert_prio_int_to_txt(args.priority))
         elif _db.remote_mode and args.stop:
             _db.sync_remote_dbstore()
         else: # print out contents stored in lists
