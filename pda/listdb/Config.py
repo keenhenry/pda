@@ -6,7 +6,11 @@ used in ``listdb`` package.
 
 """
 
-import ConfigParser
+try:
+    import configparser as ConfigParser # python 3.3, 3.4
+except ImportError:
+    import ConfigParser # python 2.6, 2.7
+
 import os
 from ..utils import die_msg, PROG_NAME
 
@@ -38,7 +42,7 @@ class PdaConfig(object):
             else:
                 self.__config.readfp(test_cfg)
 
-        except ConfigParser.ParsingError, err:
+        except ConfigParser.ParsingError as err:
             # crash pda when configuration file is ill-formatted
             die_msg(PROG_NAME, msg=err)
 
