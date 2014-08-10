@@ -14,6 +14,7 @@ devuninstall:
 	python setup.py develop --uninstall
 	rm `which pda` -rf
 	rm pda.egg-info/ -rf
+	rm *.egg
 
 test:
 	tox
@@ -25,4 +26,5 @@ clean: devuninstall
 	rm *egg-info/ -rf
 	rm dist/ -rf
 	rm build/ -rf
+	find . -iname __pycache__ | xargs rm -rf
 	find . -iname .tox -prune -o -iname '*.py[cod]' -print | xargs rm -rf
