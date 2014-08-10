@@ -6,6 +6,7 @@ This module provides utility functions that are used by ``pda`` and
 also useful for external consumption, for example, unit tests.
 
 """
+from __future__ import print_function
 
 import sys
 from operator import itemgetter
@@ -20,6 +21,21 @@ HIGH_IMPORTANCE   = 3
 MEDIUM_IMPORTANCE = 2
 LOW_IMPORTANCE    = 1
 
+def u(x):
+    """A function to convert input to a unicode object
+       this function is made for porting code to python 3
+
+    :param x: a stream of text
+    :rtype: unicode
+    """
+
+    if sys.version < '3':
+        # for python 2, string needs to be converted to unicode object!
+        import codecs
+        return codecs.unicode_escape_decode(x)[0]
+    else:
+        # for python 3, a string is always a unicode object!
+        return x
 
 def convert_prio_int_to_txt(priority):
     """map integer priority to its text equivalent
@@ -89,10 +105,10 @@ def print_header():
 
     headers = ['TASK#', 'SUMMARY', 'LIST TYPE', 'DUE TIME', 'PRIORITY']
 
-    print
-    print '{0:<5}  {1:<60}  {2:<9}  {3:<8}  {4:<8}'.format(*headers)
-    print '{0:=<5}  {1:=<60}  {2:=<9}  {3:=<8}  {4:=<8}'.format(*['', '', '', \
-                                                                  '', ''])
+    print()
+    print('{0:<5}  {1:<60}  {2:<9}  {3:<8}  {4:<8}'.format(*headers))
+    print('{0:=<5}  {1:=<60}  {2:=<9}  {3:=<8}  {4:=<8}'.format(*['', '', '', \
+                                                                  '', '']))
 
 def cry_msg(prog, err_str="", msg=""):
     """Emit error messages for pda
@@ -100,7 +116,7 @@ def cry_msg(prog, err_str="", msg=""):
     :param err_str: string
     :param msg:     string
     """
-    print '{0}: {1}{2}'.format(prog, err_str, msg)
+    print('{0}: {1}{2}'.format(prog, err_str, msg))
 
 def die_msg(prog, msg=''):
     """Crash pda with an error message -> used for more fatal errors
@@ -109,5 +125,5 @@ def die_msg(prog, msg=''):
     :param msg:     string
     """
 
-    print '{0}: error: {1}'.format(prog, msg)
+    print('{0}: error: {1}'.format(prog, msg))
     sys.exit(1)
