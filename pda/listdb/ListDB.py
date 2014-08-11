@@ -5,6 +5,7 @@
 the list databse(s) used by ``pda``.
 
 """
+from __future__ import print_function
 
 import os
 import shelve
@@ -375,12 +376,12 @@ class GithubIssues(object):
         """
 
         if self._is_selected(task_number, task_type, milestone, priority):
-            print u'{0:<5}  {1:<60}  {2:<9}  {3:<8}  {4:<8}'.format(
-                  task_number, 
-                  self.shelf[task_number]["summary"], 
-                  self.shelf[task_number]["type"], 
-                  self.shelf[task_number]["milestone"], 
-                  self.shelf[task_number]["priority"])
+            print ('{0:<5}  {1:<60}  {2:<9}  {3:<8}  {4:<8}'.format(
+                   task_number, 
+                   self.shelf[task_number]["summary"], 
+                   self.shelf[task_number]["type"], 
+                   self.shelf[task_number]["milestone"], 
+                   self.shelf[task_number]["priority"]))
 
     @staticmethod
     def extend_milestone(milestone):
@@ -405,7 +406,7 @@ class GithubIssues(object):
         :rtype: True or False
         """
 
-        return self.shelf.has_key(str(task_number))
+        return (str(task_number) in self.shelf)
 
     def get_task_prio_and_type(self, task):
         """fetch task priority and type 
@@ -460,7 +461,7 @@ class GithubIssues(object):
         """method to sync tasks from local data store with **Github Issues**
         """
 
-        if self.shelf.has_key('CMDS_HISTORY'):
+        if 'CMDS_HISTORY' in self.shelf:
 
             # syncing data to remote (Github Issues)
             for cmd in self.shelf['CMDS_HISTORY']:
