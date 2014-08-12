@@ -24,6 +24,7 @@ packages=find_packages(),
 entry_points={
     'console_scripts': ['pda = pda.control:main']
 },
+zip_safe=True,
 
 # metadata
 author="Henry Huang",
