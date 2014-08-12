@@ -14,7 +14,7 @@ devuninstall:
 	python setup.py develop --uninstall
 	rm `which pda` -rf
 	rm pda.egg-info/ -rf
-	rm *.egg
+	! rm *.egg
 
 test:
 	tox
