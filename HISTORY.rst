@@ -3,7 +3,13 @@
 Release History
 ---------------
 
-0.3.0 (2014-07-13)
+0.3.0.1 (2014-08-17)
+++++++++++++++++++
+
+* Added wheel universal support to both python 2 and 3.
+* Fixed beta release date in HISTORY.rst.
+
+0.3.0 (2014-08-17)
 ++++++++++++++++++
 
 * Added support to py33 and py34 without using ``2to3``.
