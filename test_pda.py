@@ -215,7 +215,6 @@ class ListDBSyncingTests(unittest.TestCase):
 
         # retrieve remote data for testing
         r = requests.get(self.db.url_issues, params={'state': 'open'}, auth=self.db.auth)
-        r.connection.close()
 
         for issue in r.json():
             task_no        = str(issue["number"])
@@ -279,7 +278,6 @@ class ListDBSyncingTests(unittest.TestCase):
 
         # retrieving remote data to local memory
         r = requests.get(self.db.url_issues, params={'state': 'open'}, auth=self.db.auth)
-        r.connection.close()
 
         if r.status_code == requests.codes.ok:
             remote_records = r.json()
