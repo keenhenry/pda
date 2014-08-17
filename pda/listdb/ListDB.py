@@ -198,7 +198,6 @@ class GithubIssues(object):
         """
 
         resp = requests.get(self.url_labels+'/'+name, auth=self.auth)
-        resp.connection.close()
 
         if resp.status_code == requests.codes.ok: # label found
             labels.append(name)
@@ -206,13 +205,11 @@ class GithubIssues(object):
             rep = requests.put(self.url_labels, 
                                data=json.dumps({'name': name, 'color': color}), 
                                auth=self.auth)
-            rep.connection.close()
 
             if rep.status_code == requests.codes.created:
                 labels.append(name)
             else:
                 die_msg(PROG_NAME, 'label created failed: ' + name)
-
 
     def _update_labels(self, cmd):
         """update **Github Issues** based on the information given by `cmd`
@@ -225,7 +222,6 @@ class GithubIssues(object):
 
         resp = requests.get(self.url_issues+'/'+str(issue_number)+'/labels', 
                             auth=self.auth)
-        resp.connection.close()
 
         if resp.status_code == requests.codes.ok:
             # replacing labels
@@ -251,7 +247,6 @@ class GithubIssues(object):
         else:
             die_msg(PROG_NAME, \
                     'failed to retrive labels for current issue: '+str(issue_number))
-
 
         return labels
 
@@ -284,7 +279,6 @@ class GithubIssues(object):
         # look for existing milestone
         if milestone_title:
             resp = requests.get(self.url_milestones, auth=self.auth)
-            resp.connection.close()
 
             if resp.status_code == requests.codes.ok:
                 for milestone in resp.json():
@@ -299,7 +293,6 @@ class GithubIssues(object):
             resp = requests.post(url=self.url_milestones,
                               data=json.dumps({'title': milestone_title}),
                               auth=self.auth)
-            resp.connection.close()
 
             if resp.status_code == requests.codes.created:
                 milestone_number = resp.json()['number']
@@ -361,19 +354,16 @@ class GithubIssues(object):
                                  data=json.dumps(payload), 
                                  auth=self.auth)
             success = (resp.status_code == requests.codes.created)
-            resp.connection.close()
         elif cmd['CMD'] == 'EDIT':
             resp = requests.patch(url=url, 
                                   data=json.dumps(payload), 
                                   auth=self.auth)
             success = (resp.status_code == requests.codes.ok)
-            resp.connection.close()
         else: # REMOVE
             resp = requests.patch(url=url, 
                                   data=json.dumps(payload), 
                                   auth=self.auth)
             success = (resp.status_code == requests.codes.ok)
-            resp.connection.close()
 
         return success
 
@@ -443,7 +433,6 @@ class GithubIssues(object):
         resp = requests.get(self.url_issues, 
                             params={'state': 'open'}, 
                             auth=self.auth)
-        resp.connection.close()
 
         if resp.status_code == requests.codes.ok:
             # write issue data into local db store
