@@ -4,10 +4,16 @@ import requests
 import os
 import io
 import unittest
+import sys
 
-from mock import patch
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import patch
+
 from pda.listdb.ListDB import GithubIssues
 from pda.listdb.Config import PdaConfig
+from pda.utils import u
 
 
 class MockDevice():
@@ -29,7 +35,7 @@ username   = someone
 repo-name  = todo
 """
 
-    cfg = PdaConfig(io.BytesIO(localmode_test_config))
+    cfg = PdaConfig(io.StringIO(u(localmode_test_config)))
 
     def testLocalDBPath(self):
         self.assertTrue(ConfigLocalModeTests.cfg.local_db_path == '/tmp/.pdastore')
@@ -58,7 +64,7 @@ repo-name  = todo
 auth-token = lalala
 """
 
-    cfg = PdaConfig(io.BytesIO(remotemode_test_config))
+    cfg = PdaConfig(io.StringIO(u(remotemode_test_config)))
 
     def testLocalDBPath(self):
         self.assertTrue(ConfigRemoteModeTests.cfg.local_db_path == '/tmp/.pdastore')
@@ -85,7 +91,7 @@ class ListDBTests(unittest.TestCase):
 database-path = /tmp/.pdateststore
 """
 
-        cfg = PdaConfig(io.BytesIO(localmode_test_config))
+        cfg = PdaConfig(io.StringIO(u(localmode_test_config)))
         self.db = GithubIssues(cfg)
 
         # populate local data store with some data
@@ -106,9 +112,9 @@ database-path = /tmp/.pdateststore
         self.assertTrue(len(self.db.shelf) == 3)
 
         # check tasks existence
-        self.assertTrue(self.db.shelf.has_key(self.tl[0]))
-        self.assertTrue(self.db.shelf.has_key(self.tl[1]))
-        self.assertTrue(self.db.shelf.has_key(self.tl[2]))
+        self.assertTrue(self.tl[0] in self.db.shelf)
+        self.assertTrue(self.tl[1] in self.db.shelf)
+        self.assertTrue(self.tl[2] in self.db.shelf)
 
         # check data integrity
         self.assertTrue(self.db.shelf[self.tl[0]]['summary'] == 'test summary 1')
@@ -116,7 +122,7 @@ database-path = /tmp/.pdateststore
         self.assertTrue(self.db.shelf[self.tl[1]]['milestone'] == 'month')
         self.assertTrue(self.db.shelf[self.tl[2]]['milestone'] == 'day')
         self.assertTrue(self.db.shelf[self.tl[2]]['priority'] == 'urgmust')
-        self.assertFalse(self.db.shelf.has_key('CMDS_HISTORY'))
+        self.assertFalse('CMDS_HISTORY' in self.db.shelf)
 
     def testRemoveTask(self):
 
@@ -125,7 +131,7 @@ database-path = /tmp/.pdateststore
 
         # remove task 1
         self.db.remove_task(int(self.tl[0]))
-        self.assertFalse(self.db.shelf.has_key(self.tl[0]))
+        self.assertFalse(self.tl[0] in self.db.shelf)
         self.assertTrue(len(self.db.shelf) == 2)
 
         # remove non-existing task (task id = -1) and suppress output of remove_task
@@ -133,7 +139,7 @@ database-path = /tmp/.pdateststore
             self.db.remove_task(-1)
 
         self.assertTrue(len(self.db.shelf) == 2)
-        self.assertFalse(self.db.shelf.has_key('CMDS_HISTORY'))
+        self.assertFalse('CMDS_HISTORY' in self.db.shelf)
 
     def testFinishTasks(self):
 
@@ -142,12 +148,12 @@ database-path = /tmp/.pdateststore
 
         # remove first two tasks
         self.db.finish_tasks([int(self.tl[0]), int(self.tl[1])])
-        self.assertFalse(self.db.shelf.has_key(self.tl[0]))
-        self.assertFalse(self.db.shelf.has_key(self.tl[1]))
-        self.assertTrue(self.db.shelf.has_key(self.tl[2]))
+        self.assertFalse(self.tl[0] in self.db.shelf)
+        self.assertFalse(self.tl[1] in self.db.shelf)
+        self.assertTrue(self.tl[2] in self.db.shelf)
 
         self.assertTrue(len(self.db.shelf) == 1)
-        self.assertFalse(self.db.shelf.has_key('CMDS_HISTORY'))
+        self.assertFalse('CMDS_HISTORY' in self.db.shelf)
 
     def testRemoveAllTasks(self):
 
@@ -159,8 +165,8 @@ database-path = /tmp/.pdateststore
 
         # verified they are indeed removed
         self.assertTrue(len(self.db.shelf) == 0)
-        self.assertFalse(self.db.shelf.has_key('CMDS_HISTORY'))
-        self.assertFalse(self.db.shelf.has_key(self.tl[0]))
+        self.assertFalse('CMDS_HISTORY' in self.db.shelf)
+        self.assertFalse(self.tl[0] in self.db.shelf)
 
     def testEditTask(self):
 
@@ -188,15 +194,16 @@ database-path = /tmp/.pdateststore
 
         self.assertTrue(self.db.shelf[self.tl[1]]['summary'] == 'test summary 2')
 
-        self.assertFalse(self.db.shelf.has_key('CMDS_HISTORY'))
+        self.assertFalse('CMDS_HISTORY' in self.db.shelf)
 
 
 class ListDBSyncingTests(unittest.TestCase):
 
     def setUp(self):
-        cfg = PdaConfig(io.FileIO('.pdaconfig'))
-        self.db = GithubIssues(cfg)
-        self.db.sync_local_dbstore()
+        with open('.pdaconfig', 'r') as f:
+            cfg = PdaConfig(f)
+            self.db = GithubIssues(cfg)
+            self.db.sync_local_dbstore()
 
     def tearDown(self):
         if os.path.exists(self.db.local_dbpath):
@@ -208,6 +215,7 @@ class ListDBSyncingTests(unittest.TestCase):
 
         # retrieve remote data for testing
         r = requests.get(self.db.url_issues, params={'state': 'open'}, auth=self.db.auth)
+        r.connection.close()
 
         for issue in r.json():
             task_no        = str(issue["number"])
@@ -223,7 +231,7 @@ class ListDBSyncingTests(unittest.TestCase):
                     task_type = label["name"]
 
             # after data syncing, the issue should be present in local store
-            self.assertTrue(self.db.shelf.has_key(task_no))
+            self.assertTrue(task_no in self.db.shelf)
 
             # the data stored at local should be the same as remote
             self.assertTrue(self.db.shelf[task_no]["summary"]   == task_summary)
@@ -231,13 +239,13 @@ class ListDBSyncingTests(unittest.TestCase):
             self.assertTrue(self.db.shelf[task_no]["priority"]  == task_prio)
             self.assertTrue(self.db.shelf[task_no]["milestone"] == task_milestone)
 
-        self.assertTrue(self.db.shelf.has_key('CMDS_HISTORY'))
+        self.assertTrue('CMDS_HISTORY' in self.db.shelf)
 
     def testSyncRemoteDBStore(self):
 
         if self.db.shelf:
 
-            task_numbers = [number for number in self.db.shelf.keys() \
+            task_numbers = [number for number in list(self.db.shelf.keys()) \
                                               if number != 'CMDS_HISTORY']
 
             # (1) remove tasks
@@ -271,6 +279,8 @@ class ListDBSyncingTests(unittest.TestCase):
 
         # retrieving remote data to local memory
         r = requests.get(self.db.url_issues, params={'state': 'open'}, auth=self.db.auth)
+        r.connection.close()
+
         if r.status_code == requests.codes.ok:
             remote_records = r.json()
 
