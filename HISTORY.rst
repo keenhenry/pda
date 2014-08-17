@@ -3,6 +3,13 @@
 Release History
 ---------------
 
+0.3.0 (2014-07-13)
+++++++++++++++++++
+
+* Added support to py33 and py34 without using ``2to3``.
+* Added testing support to py33 and py34 without using ``2to3``.
+* First *Beta Release*.
+
 0.2.1 (2014-07-13)
 ++++++++++++++++++
 
