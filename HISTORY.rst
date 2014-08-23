@@ -3,6 +3,11 @@
 Release History
 ---------------
 
+0.3.0.2 (2014-08-23)
+++++++++++++++++++++
+
+* Added *Latest Release*, *Supported Python Version* and *Downloads* shields.
+
 0.3.0.1 (2014-08-17)
 ++++++++++++++++++++
 

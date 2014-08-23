@@ -4,6 +4,19 @@ Personal Desktop Assistant - pda
 
 .. image:: https://travis-ci.org/keenhenry/pda.svg?branch=master
    :target: https://travis-ci.org/keenhenry/pda
+   :alt: Build Status
+
+.. image:: https://pypip.in/version/pda/badge.svg
+   :target: https://pypi.python.org/pypi/pda
+   :alt: Latest Version
+
+.. image:: https://pypip.in/py_versions/pda/badge.svg
+   :target: https://pypi.python.org/pypi/pda
+   :alt: Supported Python versions
+
+.. image:: https://pypip.in/download/pda/badge.svg
+   :target: https://pypi.python.org/pypi/pda
+   :alt: Downloads
 
 ``pda`` is a command line todo list manager. Unlike other todo list tools, ``pda``
 strives to find a balance between usability and functionality: a todo list manager 
