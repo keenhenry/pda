@@ -6,15 +6,15 @@ Personal Desktop Assistant - pda
    :target: https://travis-ci.org/keenhenry/pda
    :alt: Build Status
 
-.. image:: https://pypip.in/version/pda/badge.svg
+.. image:: https://img.shields.io/pypi/v/pda.svg
    :target: https://pypi.python.org/pypi/pda
    :alt: Latest Version
 
-.. image:: https://pypip.in/py_versions/pda/badge.svg
+.. image:: https://img.shields.io/pypi/pyversions/pda.svg
    :target: https://pypi.python.org/pypi/pda
    :alt: Supported Python versions
 
-.. image:: https://pypip.in/download/pda/badge.svg
+.. image:: https://img.shields.io/pypi/dm/pda.svg
    :target: https://pypi.python.org/pypi/pda
    :alt: Downloads
 
